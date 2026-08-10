@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KUKA Central — Fisheries Survey Data</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root{
+    --mangrove-dark:#1B2E28;
+    --mangrove-mid:#2D4A3E;
+    --sand:#F5F1E8;
+    --sand-dim:#EAE3D3;
+    --shell:#C4622D;
+    --shell-dim:#a3521f;
+    --tide:#4A6670;
+    --alert:#B23A3A;
+    --ink:#20261F;
+    --paper:#FFFFFF;
+    --line:#D8D0BC;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--sand); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  h1,h2,h3{ font-family:Georgia,"Times New Roman",serif; margin:0 0 4px 0; }
+
+  /* ===== Login screen ===== */
+  #loginScreen{
+    position:fixed; inset:0; background:var(--mangrove-dark); display:flex;
+    align-items:center; justify-content:center; z-index:200;
+  }
+  #loginScreen .card{ width:100%; max-width:380px; background:var(--paper); border-radius:14px; padding:32px 28px; }
+  #loginScreen h1{ text-align:center; color:var(--mangrove-dark); font-size:1.6rem; margin-bottom:2px; }
+  #loginScreen p.sub{ text-align:center; color:var(--tide); font-size:0.85rem; margin-bottom:22px; }
+  #loginScreen label{ display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin:14px 0 6px; }
+  #loginScreen input{ width:100%; padding:11px; border:1.5px solid var(--line); border-radius:7px; font-size:1rem; background:var(--sand); }
+  #loginErr{ display:none; background:#F7DEDE; color:var(--alert); font-size:0.82rem; padding:9px 12px; border-radius:7px; margin-top:14px; }
+  #loginErr.show{ display:block; }
+
+  /* ===== App shell ===== */
+  #appShell{ display:none; min-height:100vh; }
+  #appShell.show{ display:flex; }
+
+  #sidebar{
+    width:230px; flex:none; background:var(--mangrove-dark); color:var(--sand);
+    min-height:100vh; padding:22px 0; position:sticky; top:0; align-self:flex-start;
+  }
+  #sidebar .brand{ padding:0 22px 22px; border-bottom:1px solid #35473f; margin-bottom:14px; }
+  #sidebar .brand h1{ color:var(--sand); font-size:1.3rem; }
+  #sidebar .brand p{ color:#8AA69B; font-size:0.72rem; margin:2px 0 0; }
+  .nav-item{
+    display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:none; border:none;
+    color:#D8E4DD; font-size:0.92rem; font-weight:600; padding:13px 22px; cursor:pointer; font-family:inherit;
+  }
+  .nav-item:hover{ background:#243a33; }
+  .nav-item.active{ background:var(--shell); color:#fff; }
+
+  #main{ flex:1; padding:28px 34px; max-width:1400px; }
+  .page{ display:none; }
+  .page.active{ display:block; }
+  .page-header{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:22px; flex-wrap:wrap; gap:12px; }
+  .eyebrow{ text-transform:uppercase; letter-spacing:1.5px; font-size:0.7rem; font-weight:700; color:var(--tide); }
+
+  .stat-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:16px; margin-bottom:24px; }
+  .stat-card{ background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:18px; }
+  .stat-card .n{ font-size:2rem; font-weight:700; color:var(--mangrove-mid); font-family:Georgia,serif; }
+  .stat-card .l{ font-size:0.75rem; text-transform:uppercase; letter-spacing:0.3px; color:var(--tide); margin-top:4px; }
+
+  .chart-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }
+  @media (max-width:900px){ .chart-grid{ grid-template-columns:1fr; } #appShell.show{ flex-direction:column; } #sidebar{ width:100%; min-height:auto; position:relative; } #main{ padding:20px; } }
+
+  .card{ background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:20px; }
+  .card h3{ font-size:1rem; margin-bottom:14px; }
+
+  #mapView{ height:520px; border-radius:10px; border:1px solid var(--line); }
+
+  .filters{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+  .filters select, .filters input{ padding:9px 12px; border:1.5px solid var(--line); border-radius:7px; font-size:0.88rem; background:var(--paper); font-family:inherit; }
+  .filters input[type=text]{ flex:1; min-width:200px; }
+
+  table{ width:100%; border-collapse:collapse; font-size:0.86rem; }
+  thead th{ text-align:left; padding:10px 12px; background:var(--mangrove-dark); color:var(--sand); font-weight:600; position:sticky; top:0; white-space:nowrap; }
+  tbody td{ padding:9px 12px; border-bottom:1px solid var(--sand-dim); }
+  tbody tr:hover{ background:var(--sand-dim); }
+  .table-wrap{ overflow-x:auto; max-height:560px; overflow-y:auto; border:1px solid var(--line); border-radius:8px; }
+  .badge{ font-size:0.68rem; font-weight:700; padding:3px 9px; border-radius:10px; text-transform:uppercase; white-space:nowrap; }
+  .badge.mudcrab{ background:#F5DFC8; color:var(--shell-dim); }
+  .badge.socioeconomic{ background:#E7E1F2; color:#5B4A8A; }
+  .badge.biological{ background:#DCEAE0; color:var(--mangrove-mid); }
+
+  .btn{ display:inline-block; padding:11px 18px; border-radius:8px; font-weight:700; font-size:0.88rem; border:none; cursor:pointer; font-family:inherit; }
+  .btn-primary{ background:var(--shell); color:#fff; }
+  .btn-primary:disabled{ opacity:0.4; cursor:default; }
+  .btn-secondary{ background:none; color:var(--mangrove-mid); border:1.5px solid var(--mangrove-mid); }
+  .btn-ghost{ background:none; color:var(--tide); border:1.5px solid var(--line); font-weight:600; font-size:0.82rem; padding:8px 14px; }
+
+  .toolbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
+  .toolbar .actions{ display:flex; gap:10px; flex-wrap:wrap; }
+
+  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--mangrove-dark); color:#fff; padding:12px 22px; border-radius:24px;
+    font-size:0.85rem; font-weight:600; z-index:300; opacity:0; transition:opacity 0.25s ease; pointer-events:none; }
+  .toast.show{ opacity:1; }
+
+  #logoutBtn{ margin:14px 22px 0; }
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="card">
+    <h1>🦀 KUKA Central</h1>
+    <p class="sub">Admin data dashboard — Papua New Guinea</p>
+    <div id="loginErr"></div>
+    <label>Email</label>
+    <input type="text" id="loginEmail" autocomplete="username">
+    <label>Password</label>
+    <input type="text" id="loginPassword" autocomplete="current-password" style="-webkit-text-security:disc; text-security:disc;">
+    <button class="btn btn-primary" id="loginBtn" style="width:100%; margin-top:20px;">Log In</button>
+    <p class="sub" style="margin-top:16px;">Use your existing KUKA Collect admin account.</p>
+  </div>
+</div>
+
+<div id="appShell">
+  <aside id="sidebar">
+    <div class="brand">
+      <h1>🦀 KUKA Central</h1>
+      <p id="sidebarUser">—</p>
+    </div>
+    <button class="nav-item active" data-page="dashboard">📊 Dashboard</button>
+    <button class="nav-item" data-page="table">📋 All Surveys</button>
+    <button class="nav-item" data-page="map">🗺️ Map View</button>
+    <button class="nav-item" id="logoutBtn">🚪 Log Out</button>
+  </aside>
+
+  <main id="main">
+
+    <!-- ===== DASHBOARD ===== -->
+    <section class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="eyebrow">Overview</div>
+          <h2>Dashboard</h2>
+        </div>
+        <button class="btn btn-secondary" id="dashRefreshBtn">🔄 Refresh</button>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card"><div class="n" id="d_total">—</div><div class="l">Total Surveys</div></div>
+        <div class="stat-card"><div class="n" id="d_mudcrab">—</div><div class="l">Mud Crab</div></div>
+        <div class="stat-card"><div class="n" id="d_se">—</div><div class="l">Socio-economic</div></div>
+        <div class="stat-card"><div class="n" id="d_bio">—</div><div class="l">Biological</div></div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="card">
+          <h3>Surveys by Type</h3>
+          <canvas id="typeChart" height="220"></canvas>
+        </div>
+        <div class="card">
+          <h3>Surveys by Province</h3>
+          <canvas id="provinceChart" height="220"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Surveys Over Time</h3>
+        <canvas id="timeChart" height="140"></canvas>
+      </div>
+    </section>
+
+    <!-- ===== ALL SURVEYS (TABLE) ===== -->
+    <section class="page" id="page-table">
+      <div class="page-header">
+        <div>
+          <div class="eyebrow">Data</div>
+          <h2>All Surveys</h2>
+        </div>
+        <button class="btn btn-secondary" id="tableRefreshBtn">🔄 Refresh</button>
+      </div>
+
+      <div class="filters">
+        <input type="text" id="filterSearch" placeholder="Search site, surveyor, respondent…">
+        <select id="filterType">
+          <option value="">All types</option>
+          <option value="mudcrab">Mud Crab</option>
+          <option value="socioeconomic">Socio-economic</option>
+          <option value="biological">Biological</option>
+        </select>
+        <select id="filterProvince"><option value="">All provinces</option></select>
+      </div>
+
+      <div class="toolbar">
+        <div class="actions">
+          <button class="btn-ghost" id="selectAllBtn">Select All (visible)</button>
+          <button class="btn-ghost" id="selectNoneBtn">Select None</button>
+        </div>
+        <div class="actions">
+          <button class="btn btn-secondary" id="exportSelectedBtn">Export Selected (<span id="selCount">0</span>)</button>
+          <button class="btn btn-primary" id="exportAllBtn">Export All (Excel)</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th></th><th>Type</th><th>Site / Respondent</th><th>Surveyor</th><th>Province</th><th>Date</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"><tr><td colspan="7" style="padding:20px;">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== MAP ===== -->
+    <section class="page" id="page-map">
+      <div class="page-header">
+        <div>
+          <div class="eyebrow">Locations</div>
+          <h2>Map View</h2>
+        </div>
+        <button class="btn btn-secondary" id="mapRefreshBtn">🔄 Refresh</button>
+      </div>
+      <p class="help" style="color:var(--tide); font-size:0.85rem; margin-bottom:12px;">Every GPS-tagged submission across all surveyors, plotted on one map.</p>
+      <div id="mapView"></div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const SUPABASE_URL = "https://spwdpzcuyrwjdhvluadu.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNwd2RwemN1eXJ3amRodmx1YWR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5OTQyOTYsImV4cCI6MjA5NjU3MDI5Nn0.xoI33qTtwT0SMxY_uJGQ0xSWE1o3Q0UgifguMyjvso8";
+const ADMIN_EMAIL = "ronnisnai123@gmail.com";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let allRows = [];
+let selectedIds = {};
+let typeChartInst = null, provinceChartInst = null, timeChartInst = null;
+let mapInst = null;
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._h); toast._h = setTimeout(function(){ t.classList.remove('show'); }, 2600);
+}
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; }); }
+
+/* ===== Auth ===== */
+function showLogin(msg){
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appShell').classList.remove('show');
+  if(msg){
+    const e = document.getElementById('loginErr');
+    e.textContent = msg; e.classList.add('show');
+  }
+}
+function showApp(){
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appShell').classList.add('show');
+  document.getElementById('sidebarUser').textContent = currentUser.email;
+  loadAllData();
+}
+
+document.getElementById('loginBtn').addEventListener('click', async function(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginErr');
+  errEl.classList.remove('show');
+  if(!email || !password){ errEl.textContent = 'Please enter both email and password.'; errEl.classList.add('show'); return; }
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Logging in…';
+  try{
+    const result = await supabaseClient.auth.signInWithPassword({ email, password });
+    if(result.error) throw result.error;
+    if(result.data.user.email !== ADMIN_EMAIL){
+      await supabaseClient.auth.signOut();
+      errEl.textContent = 'This account does not have Portal access.';
+      errEl.classList.add('show');
+      return;
+    }
+    currentUser = result.data.user;
+    showApp();
+  } catch(err){
+    errEl.textContent = err.message || 'Login failed. Please try again.';
+    errEl.classList.add('show');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Log In';
+  }
+});
+document.getElementById('logoutBtn').addEventListener('click', async function(){
+  await supabaseClient.auth.signOut();
+  currentUser = null;
+  showLogin();
+});
+
+/* ===== Navigation ===== */
+document.querySelectorAll('.nav-item[data-page]').forEach(function(el){
+  el.addEventListener('click', function(){
+    document.querySelectorAll('.nav-item[data-page]').forEach(function(b){b.classList.remove('active');});
+    el.classList.add('active');
+    document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+    document.getElementById('page-'+el.dataset.page).classList.add('active');
+    if(el.dataset.page === 'map'){ setTimeout(function(){ if(mapInst) mapInst.invalidateSize(); }, 100); }
+  });
+});
+
+/* ===== Data loading ===== */
+function getProvince(row){
+  if(row.province) return row.province;
+  if(row.data && row.data.province) return row.data.province;
+  if(row.data && row.data.resp_province) return row.data.resp_province;
+  return 'Unknown';
+}
+function getLabel(row){
+  return row.sampling_site || (row.data && (row.data.resp_fullname || row.data.site)) || 'Untitled';
+}
+function getGps(row){
+  if(row.gps && row.gps.lat) return row.gps;
+  if(row.data && row.data.gps && row.data.gps.lat) return row.data.gps;
+  return null;
+}
+
+async function loadAllData(){
+  document.getElementById('tableBody').innerHTML = '<tr><td colspan="7" style="padding:20px;">Loading…</td></tr>';
+  try{
+    const result = await supabaseClient.from('surveys').select('*').order('submitted_at', { ascending:false });
+    if(result.error){
+      toast('Could not load data: '+result.error.message);
+      return;
+    }
+    allRows = result.data || [];
+    selectedIds = {};
+    renderDashboard();
+    renderProvinceFilter();
+    renderTable();
+    renderMap();
+  }catch(err){
+    toast('Could not load data. Check your connection.');
+  }
+}
+document.getElementById('dashRefreshBtn').addEventListener('click', loadAllData);
+document.getElementById('tableRefreshBtn').addEventListener('click', loadAllData);
+document.getElementById('mapRefreshBtn').addEventListener('click', loadAllData);
+
+/* ===== Dashboard ===== */
+function renderDashboard(){
+  const mc = allRows.filter(function(r){return r.survey_type==='mudcrab';});
+  const se = allRows.filter(function(r){return r.survey_type==='socioeconomic';});
+  const bio = allRows.filter(function(r){return r.survey_type==='biological';});
+  document.getElementById('d_total').textContent = allRows.length;
+  document.getElementById('d_mudcrab').textContent = mc.length;
+  document.getElementById('d_se').textContent = se.length;
+  document.getElementById('d_bio').textContent = bio.length;
+
+  if(typeof Chart === 'undefined') return;
+
+  if(typeChartInst) typeChartInst.destroy();
+  typeChartInst = new Chart(document.getElementById('typeChart'), {
+    type:'doughnut',
+    data:{ labels:['Mud Crab','Socio-economic','Biological'], datasets:[{ data:[mc.length,se.length,bio.length], backgroundColor:['#C4622D','#5B4A8A','#2D4A3E'] }] },
+    options:{ plugins:{ legend:{ position:'bottom' } } }
+  });
+
+  const provinceCounts = {};
+  allRows.forEach(function(r){ const p=getProvince(r); provinceCounts[p]=(provinceCounts[p]||0)+1; });
+  const provinceLabels = Object.keys(provinceCounts).sort(function(a,b){return provinceCounts[b]-provinceCounts[a];});
+  if(provinceChartInst) provinceChartInst.destroy();
+  provinceChartInst = new Chart(document.getElementById('provinceChart'), {
+    type:'bar',
+    data:{ labels:provinceLabels, datasets:[{ data:provinceLabels.map(function(p){return provinceCounts[p];}), backgroundColor:'#4A6670' }] },
+    options:{ plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
+  });
+
+  const dateCounts = {};
+  allRows.forEach(function(r){ const d=(r.survey_date||'Unknown'); dateCounts[d]=(dateCounts[d]||0)+1; });
+  const dateLabels = Object.keys(dateCounts).sort();
+  if(timeChartInst) timeChartInst.destroy();
+  timeChartInst = new Chart(document.getElementById('timeChart'), {
+    type:'line',
+    data:{ labels:dateLabels, datasets:[{ label:'Surveys submitted', data:dateLabels.map(function(d){return dateCounts[d];}), borderColor:'#C4622D', backgroundColor:'rgba(196,98,45,0.15)', fill:true, tension:0.25 }] },
+    options:{ plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
+  });
+}
+
+/* ===== Table ===== */
+function renderProvinceFilter(){
+  const sel = document.getElementById('filterProvince');
+  const current = sel.value;
+  const provinces = Array.from(new Set(allRows.map(getProvince))).sort();
+  sel.innerHTML = '<option value="">All provinces</option>' + provinces.map(function(p){ return '<option value="'+escapeHtml(p)+'">'+escapeHtml(p)+'</option>'; }).join('');
+  sel.value = current;
+}
+function getFilteredRows(){
+  const q = document.getElementById('filterSearch').value.trim().toLowerCase();
+  const typeF = document.getElementById('filterType').value;
+  const provF = document.getElementById('filterProvince').value;
+  return allRows.filter(function(r){
+    if(typeF && r.survey_type !== typeF) return false;
+    if(provF && getProvince(r) !== provF) return false;
+    if(q){
+      const hay = (getLabel(r)+' '+(r.surveyor1||'')+' '+(r.survey_date||'')).toLowerCase();
+      if(hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+}
+function renderTable(){
+  const rows = getFilteredRows();
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  if(rows.length === 0){
+    tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;">No surveys match your filters.</td></tr>';
+    updateSelCount();
+    return;
+  }
+  rows.forEach(function(r){
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td><input type="checkbox" data-rowid="'+r.id+'" '+(selectedIds[r.id]?'checked':'')+'></td>'+
+      '<td><span class="badge '+r.survey_type+'">'+r.survey_type+'</span></td>'+
+      '<td>'+escapeHtml(getLabel(r))+'</td>'+
+      '<td>'+escapeHtml(r.surveyor1||'—')+'</td>'+
+      '<td>'+escapeHtml(getProvince(r))+'</td>'+
+      '<td>'+escapeHtml(r.survey_date||'—')+'</td>'+
+      '<td>'+(r.synced === false ? 'Pending' : 'Synced')+'</td>';
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('[data-rowid]').forEach(function(el){
+    el.addEventListener('change', function(e){
+      if(e.target.checked){ selectedIds[e.target.dataset.rowid] = true; }
+      else{ delete selectedIds[e.target.dataset.rowid]; }
+      updateSelCount();
+    });
+  });
+  updateSelCount();
+}
+function updateSelCount(){ document.getElementById('selCount').textContent = Object.keys(selectedIds).length; }
+document.getElementById('filterSearch').addEventListener('input', renderTable);
+document.getElementById('filterType').addEventListener('change', renderTable);
+document.getElementById('filterProvince').addEventListener('change', renderTable);
+document.getElementById('selectAllBtn').addEventListener('click', function(){
+  getFilteredRows().forEach(function(r){ selectedIds[r.id] = true; });
+  renderTable();
+});
+document.getElementById('selectNoneBtn').addEventListener('click', function(){
+  selectedIds = {};
+  renderTable();
+});
+
+/* ===== Export ===== */
+function buildWorkbook(rows){
+  const wb = XLSX.utils.book_new();
+  const mc = rows.filter(function(r){return r.survey_type === 'mudcrab';});
+  const se = rows.filter(function(r){return r.survey_type === 'socioeconomic';});
+  const bio = rows.filter(function(r){return r.survey_type === 'biological';});
+
+  if(mc.length > 0){
+    const headers = ['Survey ID','Surveyor','Date','Province','LLG','Sampling Site','Tide Condition','Comments','Quadrat #','Crab #','Species','Sex','Carapace Width','Weight'];
+    const aoa = [headers];
+    mc.forEach(function(rec){
+      const base = [rec.id, rec.surveyor1, rec.survey_date, rec.province, rec.llg, rec.sampling_site, rec.tide_condition, rec.comments];
+      const quadrats = rec.quadrats || [];
+      if(quadrats.length === 0){ aoa.push(base.concat(['','','','','',''])); }
+      else{ quadrats.forEach(function(q, qi){
+        if(!q.crabs || q.crabs.length===0){ aoa.push(base.concat([qi+1,'','','','',''])); }
+        else{ q.crabs.forEach(function(c,ci){ aoa.push(base.concat([qi+1, ci+1, c.species, c.sex, c.carapaceWidth, c.weight])); }); }
+      }); }
+    });
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = headers.map(function(){return {wch:16};});
+    XLSX.utils.book_append_sheet(wb, ws, 'Mud Crab');
+  }
+  if(se.length > 0){
+    const headers = ['Survey ID','Surveyor','Date','Respondent','Village','Province','Consent','Main Income Source','Population Note'];
+    const aoa = [headers];
+    se.forEach(function(rec){
+      const d = rec.data || {};
+      aoa.push([rec.id, rec.surveyor1, rec.survey_date, d.resp_fullname, d.resp_village, d.resp_province, d.consent?'Yes':'No', d.q3_mainincome, d.q31_population]);
+    });
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = headers.map(function(){return {wch:18};});
+    XLSX.utils.book_append_sheet(wb, ws, 'Socio-economic');
+  }
+  if(bio.length > 0){
+    const headers = ['Survey ID','Surveyor 1','Surveyor 2','Date','Province','LLG','Sampling Site','Bait #','Crab #','Sex','Carapace Width','Weight'];
+    const aoa = [headers];
+    bio.forEach(function(rec){
+      const d = rec.data || {};
+      const base = [rec.id, rec.surveyor1, d.surveyor2, rec.survey_date, rec.province || d.province, rec.llg || d.llg, rec.sampling_site];
+      const stations = d.baitStations || [];
+      if(stations.length === 0){ aoa.push(base.concat(['','','','',''])); }
+      else{ stations.forEach(function(b){
+        if(!b.crabs || b.crabs.length===0){ aoa.push(base.concat([b.baitNumber,'','','',''])); }
+        else{ b.crabs.forEach(function(c,ci){ aoa.push(base.concat([b.baitNumber, ci+1, c.sex, c.carapaceWidth, c.weight])); }); }
+      }); }
+    });
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = headers.map(function(){return {wch:16};});
+    XLSX.utils.book_append_sheet(wb, ws, 'Biological');
+  }
+  return wb;
+}
+document.getElementById('exportAllBtn').addEventListener('click', function(){
+  if(allRows.length === 0){ toast('No data to export yet.'); return; }
+  const wb = buildWorkbook(allRows);
+  XLSX.writeFile(wb, 'kuka_portal_all_'+Date.now()+'.xlsx');
+  toast('Exported '+allRows.length+' surveys');
+});
+document.getElementById('exportSelectedBtn').addEventListener('click', function(){
+  const ids = Object.keys(selectedIds);
+  if(ids.length === 0){ toast('Tick at least one survey to export.'); return; }
+  const rows = allRows.filter(function(r){ return selectedIds[r.id]; });
+  const wb = buildWorkbook(rows);
+  XLSX.writeFile(wb, 'kuka_portal_selected_'+Date.now()+'.xlsx');
+  toast('Exported '+rows.length+' selected survey'+(rows.length===1?'':'s'));
+});
+
+/* ===== Map ===== */
+function renderMap(){
+  if(typeof L === 'undefined') return;
+  if(!mapInst){
+    mapInst = L.map('mapView').setView([-6.3, 143.9], 6); // PNG-centered default view
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:18 }).addTo(mapInst);
+    mapInst._markerLayer = L.layerGroup().addTo(mapInst);
+  }
+  mapInst._markerLayer.clearLayers();
+  const points = [];
+  allRows.forEach(function(r){
+    const gps = getGps(r);
+    if(!gps) return;
+    const marker = L.marker([gps.lat, gps.lon]).addTo(mapInst._markerLayer);
+    marker.bindPopup('<strong>'+escapeHtml(getLabel(r))+'</strong><br>'+r.survey_type+'<br>'+(r.survey_date||'')+' · '+escapeHtml(r.surveyor1||''));
+    points.push([gps.lat, gps.lon]);
+  });
+  if(points.length > 0){ mapInst.fitBounds(points, { padding:[30,30], maxZoom:12 }); }
+}
+
+/* ===== Init ===== */
+(async function init(){
+  const sessionResult = await supabaseClient.auth.getSession();
+  if(sessionResult.data.session && sessionResult.data.session.user && sessionResult.data.session.user.email === ADMIN_EMAIL){
+    currentUser = sessionResult.data.session.user;
+    showApp();
+  } else {
+    showLogin();
+  }
+})();
+</script>
+</body>
+</html>
