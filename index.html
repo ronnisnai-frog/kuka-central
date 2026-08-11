@@ -145,6 +145,29 @@
 
   #mapView{ height:480px; border-radius:10px; border:1px solid var(--line); }
 
+  .gallery-card{ background:var(--paper); border:1px solid rgba(27,46,40,0.06); border-radius:10px; overflow:hidden; cursor:pointer;
+    box-shadow: 0 2px 6px rgba(27,46,40,0.06), 0 8px 18px rgba(27,46,40,0.09); transition:transform .15s ease; }
+  .gallery-card:hover{ transform:translateY(-2px); }
+  .gallery-card img{ width:100%; height:140px; object-fit:cover; display:block; background:var(--sand-dim); }
+  .gallery-card .caption{ padding:8px 10px; }
+  .gallery-card .caption .sid{ font-size:0.72rem; font-weight:700; color:var(--mangrove-mid); }
+  .gallery-card .caption .date{ font-size:0.7rem; color:var(--tide); }
+
+  #lightbox{ position:fixed; inset:0; background:rgba(27,46,40,0.9); z-index:400; display:none; align-items:center; justify-content:center; padding:30px; }
+  #lightbox.show{ display:flex; }
+  #lightbox img{ max-width:90vw; max-height:80vh; border-radius:8px; }
+  #lightbox .lbCaption{ position:absolute; bottom:24px; left:0; right:0; text-align:center; color:#fff; font-size:0.85rem; }
+  #lightbox .lbClose{ position:absolute; top:20px; right:26px; color:#fff; font-size:1.6rem; background:none; border:none; cursor:pointer; }
+
+  .report-card{ background:var(--paper); border:1px solid var(--line); border-left:4px solid var(--tide); border-radius:8px; margin-bottom:18px; overflow:hidden; }
+  .report-card .rhead{ padding:14px 16px; }
+  .report-card .rhead h4{ margin:0; font-size:0.98rem; color:var(--tide); font-family:Georgia,serif; }
+  .report-card .rhead .rmeta{ font-size:0.76rem; color:#8A9188; margin-top:2px; }
+  .report-card table{ width:100%; }
+  .report-card thead th{ background:var(--mangrove-mid); font-size:0.76rem; }
+  .report-card tbody td{ font-size:0.85rem; }
+  .report-card .rvalue{ color:var(--shell-dim); font-weight:600; }
+
   .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--mangrove-dark); color:#fff; padding:12px 22px; border-radius:24px;
     font-size:0.85rem; font-weight:600; z-index:300; opacity:0; transition:opacity 0.25s ease; pointer-events:none; }
   .toast.show{ opacity:1; }
@@ -253,6 +276,8 @@
             <div class="toggle-row">
               <button class="active" id="dataViewTableBtn">📋 Table</button>
               <button id="dataViewMapBtn">🗺️ Map</button>
+              <button id="dataViewGalleryBtn">🖼️ Gallery</button>
+              <button id="dataViewReportsBtn">📈 Reports</button>
             </div>
 
             <div id="dataTableView">
@@ -272,9 +297,21 @@
               </div>
               <div class="table-wrap">
                 <table>
-                  <thead><tr><th></th><th>Site / Respondent</th><th>Surveyor</th><th>Province</th><th>Date</th><th>Status</th></tr></thead>
+                  <thead><tr id="tableHeadRow"></tr></thead>
                   <tbody id="tableBody"><tr><td colspan="6" style="padding:20px;">Loading…</td></tr></tbody>
                 </table>
+              </div>
+              <div class="toolbar" style="margin-top:12px;">
+                <span style="font-size:0.8rem; color:var(--tide);" id="tablePageLabel">Page 1 of 1</span>
+                <div class="actions">
+                  <select id="tableRowsPerPage">
+                    <option value="10">10 rows</option>
+                    <option value="30" selected>30 rows</option>
+                    <option value="50">50 rows</option>
+                  </select>
+                  <button class="btn-ghost" id="tablePrevBtn">‹ Prev</button>
+                  <button class="btn-ghost" id="tableNextBtn">Next ›</button>
+                </div>
               </div>
             </div>
 
@@ -286,6 +323,26 @@
                 <span><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#2D4A3E; margin-right:5px;"></span>Biological</span>
               </div>
               <div id="mapView"></div>
+            </div>
+
+            <div id="dataGalleryView" style="display:none;">
+              <div class="filters">
+                <select id="gallerySortBy">
+                  <option value="date_desc">Sort by: Date (Newest first)</option>
+                  <option value="date_asc">Sort by: Date (Oldest first)</option>
+                  <option value="survey_id">Sort by: Survey ID</option>
+                </select>
+                <input type="date" id="galleryDateFrom" title="From date">
+                <input type="date" id="galleryDateTo" title="To date">
+              </div>
+              <div id="galleryGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(170px, 1fr)); gap:14px;"></div>
+            </div>
+
+            <div id="dataReportsView" style="display:none;">
+              <div style="background:#FDF0DE; border:1px solid #EACB9A; border-radius:8px; padding:10px 14px; font-size:0.82rem; color:var(--shell-dim); margin-bottom:16px;">
+                ⚠️ This is an automated report based on raw data submitted to this project. Please review before using these figures externally.
+              </div>
+              <div id="reportsGrid"></div>
             </div>
           </div>
         </section>
@@ -301,10 +358,32 @@
 
               <div class="settings-page active" id="settings-general">
                 <div class="card">
+                  <h3 id="genProjectName">Mud Crab Survey</h3>
+                  <p class="sub">Project Name — set in KUKA Collect, shown here for reference.</p>
+                  <div class="divider-fancy"><div class="dash"></div><div class="mark"></div><div class="dash"></div></div>
+
+                  <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Description</label>
+                  <textarea id="genDescription" rows="3" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);"></textarea>
+                  <button class="btn btn-primary" id="genSaveBtn" style="margin-top:12px;">Save Changes</button>
+                  <span id="genSaveStatus" style="font-size:0.78rem; color:var(--tide); margin-left:10px;"></span>
+
+                  <div class="info-grid" style="margin-top:20px;">
+                    <div class="info-item"><div class="k">Sector</div><div class="v">Fisheries</div></div>
+                    <div class="info-item"><div class="k">Country</div><div class="v">Papua New Guinea</div></div>
+                  </div>
+                </div>
+
+                <div class="card">
                   <h3>Team Access</h3>
                   <p class="sub">Manage who can request access from the Users tab. Portal (KUKA Central) access is currently limited to a single admin account.</p>
                   <div class="divider-fancy"><div class="dash"></div><div class="mark"></div><div class="dash"></div></div>
                   <div class="team-member"><div class="avatar">R</div><div>ronnisnai123@gmail.com — Admin (Portal + Mobile)</div></div>
+                </div>
+
+                <div class="card" style="border-color:rgba(178,58,58,0.2);">
+                  <h3 style="color:var(--alert);">Danger Zone</h3>
+                  <p class="sub">Permanently deletes every submitted <span id="genDangerTypeName">Mud Crab Survey</span> record from your KUKA account. This cannot be undone — export a backup first.</p>
+                  <button class="btn" id="genDeleteBtn" style="background:none; color:var(--alert); border:1.5px solid var(--alert);">Delete Project and Data</button>
                 </div>
               </div>
 
@@ -356,6 +435,22 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<div id="lightbox">
+  <button class="lbClose" id="lightboxClose">✕</button>
+  <img id="lightboxImg" src="" alt="">
+  <div class="lbCaption" id="lightboxCaption"></div>
+</div>
+
+<div id="rowDetailModal" style="position:fixed; inset:0; background:rgba(27,46,40,0.5); z-index:400; display:none; align-items:center; justify-content:center; padding:24px;">
+  <div style="background:var(--paper); border-radius:12px; padding:24px; max-width:520px; width:100%; max-height:80vh; overflow-y:auto;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <h3 style="margin:0;">Survey Details</h3>
+      <button id="rowDetailClose" style="background:none; border:none; font-size:1.3rem; cursor:pointer; color:var(--tide);">✕</button>
+    </div>
+    <div id="rowDetailContent"></div>
   </div>
 </div>
 
@@ -461,10 +556,14 @@ document.querySelectorAll('.survey-item').forEach(function(el){
     el.classList.add('active');
     selectedType = el.dataset.survey;
     selectedIds = {};
+    tableCurrentPage = 0;
     renderSummary();
     renderProvinceFilter();
     renderTable();
     renderMap();
+    loadGeneralSettings();
+    if(document.getElementById('dataGalleryView').style.display !== 'none'){ renderGallery(); }
+    if(document.getElementById('dataReportsView').style.display !== 'none'){ renderReports(); }
   });
 });
 
@@ -476,12 +575,127 @@ document.getElementById('qlDownload').addEventListener('click', function(){ expo
 function showDataView(view){
   document.getElementById('dataViewTableBtn').classList.toggle('active', view==='table');
   document.getElementById('dataViewMapBtn').classList.toggle('active', view==='map');
+  document.getElementById('dataViewGalleryBtn').classList.toggle('active', view==='gallery');
+  document.getElementById('dataViewReportsBtn').classList.toggle('active', view==='reports');
   document.getElementById('dataTableView').style.display = view==='table' ? 'block' : 'none';
   document.getElementById('dataMapView').style.display = view==='map' ? 'block' : 'none';
+  document.getElementById('dataGalleryView').style.display = view==='gallery' ? 'block' : 'none';
+  document.getElementById('dataReportsView').style.display = view==='reports' ? 'block' : 'none';
   if(view === 'map'){ setTimeout(function(){ if(mapInst) mapInst.invalidateSize(); }, 100); }
+  if(view === 'gallery'){ renderGallery(); }
+  if(view === 'reports'){ renderReports(); }
 }
 document.getElementById('dataViewTableBtn').addEventListener('click', function(){ showDataView('table'); });
 document.getElementById('dataViewMapBtn').addEventListener('click', function(){ showDataView('map'); });
+document.getElementById('dataViewGalleryBtn').addEventListener('click', function(){ showDataView('gallery'); });
+document.getElementById('dataViewReportsBtn').addEventListener('click', function(){ showDataView('reports'); });
+
+/* ===== Gallery ===== */
+function collectPhotos(){
+  const photos = [];
+  rowsForSelectedType().forEach(function(rec){
+    if(rec.survey_type === 'mudcrab'){
+      (rec.quadrats||[]).forEach(function(q, qi){
+        (q.crabs||[]).forEach(function(c, ci){
+          if(c.photo){ photos.push({ photo:c.photo, surveyId:rec.id, date:rec.survey_date, label:c.species+' — '+c.sex, site:rec.sampling_site }); }
+        });
+      });
+    }
+    if(rec.survey_type === 'biological'){
+      const stations = (rec.data && rec.data.baitStations) || [];
+      stations.forEach(function(b, bi){
+        (b.crabs||[]).forEach(function(c, ci){
+          if(c.photo){ photos.push({ photo:c.photo, surveyId:rec.id, date:rec.survey_date, label:'Bait '+(b.baitNumber||bi+1)+' — '+c.sex, site:rec.sampling_site }); }
+        });
+      });
+    }
+  });
+  return photos;
+}
+function renderGallery(){
+  let photos = collectPhotos();
+  const from = document.getElementById('galleryDateFrom').value;
+  const to = document.getElementById('galleryDateTo').value;
+  if(from) photos = photos.filter(function(p){ return p.date && p.date >= from; });
+  if(to) photos = photos.filter(function(p){ return p.date && p.date <= to; });
+
+  const sortBy = document.getElementById('gallerySortBy').value;
+  photos.sort(function(a,b){
+    if(sortBy === 'date_asc') return (a.date||'').localeCompare(b.date||'');
+    if(sortBy === 'survey_id') return (a.surveyId||'').localeCompare(b.surveyId||'');
+    return (b.date||'').localeCompare(a.date||'');
+  });
+
+  const grid = document.getElementById('galleryGrid');
+  grid.innerHTML = '';
+  if(photos.length === 0){
+    grid.innerHTML = '<p class="sub" style="grid-column:1/-1;">No photos found for this survey type'+((from||to)?' in the selected date range':'')+'.</p>';
+    return;
+  }
+  photos.forEach(function(p){
+    const shortId = (p.surveyId||'').slice(0,10);
+    const div = document.createElement('div');
+    div.className = 'gallery-card';
+    div.innerHTML = '<img src="'+p.photo+'" alt="'+escapeHtml(p.label)+'">'+
+      '<div class="caption"><div class="sid">'+escapeHtml(shortId)+'</div><div class="date">'+escapeHtml(p.date||'—')+'</div></div>';
+    div.addEventListener('click', function(){ openLightbox(p); });
+    grid.appendChild(div);
+  });
+}
+function openLightbox(p){
+  document.getElementById('lightboxImg').src = p.photo;
+  document.getElementById('lightboxCaption').textContent = (p.site||'')+' · '+p.label+' · '+(p.date||'')+' · Survey '+(p.surveyId||'').slice(0,10);
+  document.getElementById('lightbox').classList.add('show');
+}
+document.getElementById('lightboxClose').addEventListener('click', function(){ document.getElementById('lightbox').classList.remove('show'); });
+document.getElementById('lightbox').addEventListener('click', function(e){ if(e.target.id === 'lightbox') document.getElementById('lightbox').classList.remove('show'); });
+document.getElementById('gallerySortBy').addEventListener('change', renderGallery);
+document.getElementById('galleryDateFrom').addEventListener('change', renderGallery);
+document.getElementById('galleryDateTo').addEventListener('change', renderGallery);
+
+/* ===== Reports ===== */
+function renderReports(){
+  const rows = rowsForSelectedType();
+  const cols = COLUMNS_BY_TYPE[selectedType];
+  const grid = document.getElementById('reportsGrid');
+  grid.innerHTML = '';
+
+  if(rows.length === 0){
+    grid.innerHTML = '<p class="sub">No submissions yet for this survey type — reports will appear once data comes in.</p>';
+    return;
+  }
+
+  cols.forEach(function(col){
+    const freq = {};
+    let answered = 0;
+    rows.forEach(function(r){
+      const v = col.get(r);
+      if(!v || v === '—'){ return; }
+      answered++;
+      freq[v] = (freq[v] || 0) + 1;
+    });
+    const withoutData = rows.length - answered;
+    const values = Object.keys(freq).sort(function(a,b){ return freq[b] - freq[a]; });
+
+    const card = document.createElement('div');
+    card.className = 'report-card';
+    let html = '<div class="rhead"><h4>'+escapeHtml(col.label)+'</h4>'+
+      '<div class="rmeta">'+answered+' out of '+rows.length+' submissions answered this field. ('+withoutData+' had no data.)</div></div>';
+
+    if(values.length === 0){
+      html += '<div style="padding:0 16px 16px; font-size:0.82rem; color:#8A9188;">No values recorded.</div>';
+    } else {
+      html += '<table><thead><tr><th>Value</th><th>Frequency</th><th>Percentage</th></tr></thead><tbody>';
+      values.forEach(function(v){
+        const pct = ((freq[v] / rows.length) * 100).toFixed(1);
+        html += '<tr><td class="rvalue">'+escapeHtml(v)+'</td><td>'+freq[v]+'</td><td>'+pct+'%</td></tr>';
+      });
+      html += '</tbody></table>';
+    }
+    card.innerHTML = html;
+    grid.appendChild(card);
+  });
+}
 
 /* ===== Data loading ===== */
 function getProvince(row){
@@ -583,6 +797,63 @@ async function loadUsers(){
 }
 
 /* ===== Data table ===== */
+function joinField(list, field){
+  const vals = (list||[]).map(function(x){ return x[field]; }).filter(function(v){ return v !== undefined && v !== null && v !== ''; });
+  return vals.length ? vals.join(', ') : '—';
+}
+function allCrabs(rec){
+  const out = [];
+  (rec.quadrats||[]).forEach(function(q){ (q.crabs||[]).forEach(function(c){ out.push(c); }); });
+  return out;
+}
+function allBaitCrabs(rec){
+  const out = [];
+  const stations = (rec.data && rec.data.baitStations) || [];
+  stations.forEach(function(b){ (b.crabs||[]).forEach(function(c){ out.push(c); }); });
+  return out;
+}
+function statusLabel(r){ return r.synced === false ? 'Pending' : 'Synced'; }
+
+const COLUMNS_BY_TYPE = {
+  mudcrab: [
+    { label:'Start Time', get:function(r){ return r.start_time || '—'; } },
+    { label:'Date', get:function(r){ return r.survey_date || '—'; } },
+    { label:'Surveyor', get:function(r){ return r.surveyor1 || '—'; } },
+    { label:'Province', get:function(r){ return getProvince(r); } },
+    { label:'LLG', get:function(r){ return r.llg || '—'; } },
+    { label:'Sampling Site', get:function(r){ return getLabel(r); } },
+    { label:'Tide Condition', get:function(r){ return r.tide_condition || '—'; } },
+    { label:'Species', get:function(r){ return joinField(allCrabs(r), 'species'); } },
+    { label:'Sex', get:function(r){ return joinField(allCrabs(r), 'sex'); } },
+    { label:'Berried', get:function(r){ return joinField(allCrabs(r), 'berried'); } },
+    { label:'Carapace Width', get:function(r){ return joinField(allCrabs(r), 'carapaceWidth'); } },
+    { label:'Weight', get:function(r){ return joinField(allCrabs(r), 'weight'); } },
+    { label:'Status', get:statusLabel }
+  ],
+  socioeconomic: [
+    { label:'Date', get:function(r){ return r.survey_date || '—'; } },
+    { label:'Surveyor', get:function(r){ return r.surveyor1 || '—'; } },
+    { label:'Respondent', get:function(r){ return getLabel(r); } },
+    { label:'Village', get:function(r){ return (r.data && r.data.resp_village) || '—'; } },
+    { label:'Province', get:function(r){ return getProvince(r); } },
+    { label:'Consent', get:function(r){ return (r.data && r.data.consent) ? 'Yes' : 'No'; } },
+    { label:'Main Income Source', get:function(r){ return (r.data && r.data.q3_mainincome) || '—'; } },
+    { label:'Status', get:statusLabel }
+  ],
+  biological: [
+    { label:'Start Time', get:function(r){ return r.start_time || '—'; } },
+    { label:'Date', get:function(r){ return r.survey_date || '—'; } },
+    { label:'Surveyor 1', get:function(r){ return r.surveyor1 || '—'; } },
+    { label:'Surveyor 2', get:function(r){ return (r.data && r.data.surveyor2) || '—'; } },
+    { label:'Province', get:function(r){ return getProvince(r); } },
+    { label:'Sampling Site', get:function(r){ return getLabel(r); } },
+    { label:'Sex', get:function(r){ return joinField(allBaitCrabs(r), 'sex'); } },
+    { label:'Carapace Width', get:function(r){ return joinField(allBaitCrabs(r), 'carapaceWidth'); } },
+    { label:'Weight', get:function(r){ return joinField(allBaitCrabs(r), 'weight'); } },
+    { label:'Status', get:statusLabel }
+  ]
+};
+
 function renderProvinceFilter(){
   const sel = document.getElementById('filterProvince');
   const current = sel.value;
@@ -602,37 +873,76 @@ function getFilteredRows(){
     return true;
   });
 }
+
+let tableCurrentPage = 0;
+
 function renderTable(){
-  const rows = getFilteredRows();
+  const cols = COLUMNS_BY_TYPE[selectedType];
+  const headRow = document.getElementById('tableHeadRow');
+  headRow.innerHTML = '<th></th>' + cols.map(function(c){ return '<th>'+escapeHtml(c.label)+'</th>'; }).join('') + '<th></th>';
+
+  const allFiltered = getFilteredRows();
+  const rowsPerPage = parseInt(document.getElementById('tableRowsPerPage').value);
+  const totalPages = Math.max(1, Math.ceil(allFiltered.length / rowsPerPage));
+  tableCurrentPage = Math.min(tableCurrentPage, totalPages - 1);
+  const rows = allFiltered.slice(tableCurrentPage * rowsPerPage, (tableCurrentPage+1) * rowsPerPage);
+
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = '';
   if(rows.length === 0){
-    tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;">No surveys match your filters.</td></tr>';
-    updateSelCount();
-    return;
-  }
-  rows.forEach(function(r){
-    const tr = document.createElement('tr');
-    tr.innerHTML = '<td><input type="checkbox" data-rowid="'+r.id+'" '+(selectedIds[r.id]?'checked':'')+'></td>'+
-      '<td>'+escapeHtml(getLabel(r))+'</td>'+
-      '<td>'+escapeHtml(r.surveyor1||'—')+'</td>'+
-      '<td>'+escapeHtml(getProvince(r))+'</td>'+
-      '<td>'+escapeHtml(r.survey_date||'—')+'</td>'+
-      '<td>'+(r.synced === false ? 'Pending' : 'Synced')+'</td>';
-    tbody.appendChild(tr);
-  });
-  tbody.querySelectorAll('[data-rowid]').forEach(function(el){
-    el.addEventListener('change', function(e){
-      if(e.target.checked){ selectedIds[e.target.dataset.rowid] = true; }
-      else{ delete selectedIds[e.target.dataset.rowid]; }
-      updateSelCount();
+    tbody.innerHTML = '<tr><td colspan="'+(cols.length+2)+'" style="padding:20px;">No surveys match your filters.</td></tr>';
+  } else {
+    rows.forEach(function(r){
+      const tr = document.createElement('tr');
+      const cells = cols.map(function(c){ return '<td>'+escapeHtml(c.get(r))+'</td>'; }).join('');
+      tr.innerHTML = '<td><input type="checkbox" data-rowid="'+r.id+'" '+(selectedIds[r.id]?'checked':'')+'></td>'+
+        cells +
+        '<td><button class="btn-ghost" data-viewrow="'+r.id+'" style="padding:4px 9px;">👁</button></td>';
+      tbody.appendChild(tr);
     });
-  });
+    tbody.querySelectorAll('[data-rowid]').forEach(function(el){
+      el.addEventListener('change', function(e){
+        if(e.target.checked){ selectedIds[e.target.dataset.rowid] = true; }
+        else{ delete selectedIds[e.target.dataset.rowid]; }
+        updateSelCount();
+      });
+    });
+    tbody.querySelectorAll('[data-viewrow]').forEach(function(el){
+      el.addEventListener('click', function(){
+        const rec = allFiltered.find(function(r){ return r.id === el.dataset.viewrow; });
+        if(rec) showRowDetail(rec);
+      });
+    });
+  }
+  document.getElementById('tablePageLabel').textContent = 'Page '+(tableCurrentPage+1)+' of '+totalPages+' ('+allFiltered.length+' result'+(allFiltered.length===1?'':'s')+')';
+  document.getElementById('tablePrevBtn').disabled = tableCurrentPage === 0;
+  document.getElementById('tableNextBtn').disabled = tableCurrentPage >= totalPages - 1;
   updateSelCount();
 }
+document.getElementById('tableRowsPerPage').addEventListener('change', function(){ tableCurrentPage = 0; renderTable(); });
+document.getElementById('tablePrevBtn').addEventListener('click', function(){ if(tableCurrentPage>0){ tableCurrentPage--; renderTable(); } });
+document.getElementById('tableNextBtn').addEventListener('click', function(){ tableCurrentPage++; renderTable(); });
+
+function showRowDetail(rec){
+  const cols = COLUMNS_BY_TYPE[rec.survey_type];
+  let html = '<div class="info-grid">';
+  html += '<div class="info-item"><div class="k">Survey ID</div><div class="v">'+escapeHtml(rec.id)+'</div></div>';
+  cols.forEach(function(c){
+    html += '<div class="info-item"><div class="k">'+escapeHtml(c.label)+'</div><div class="v">'+escapeHtml(c.get(rec))+'</div></div>';
+  });
+  html += '</div>';
+  const comments = rec.comments || (rec.data && rec.data.q33_actions);
+  if(comments){ html += '<p class="sub" style="margin-top:14px;"><strong>Comments:</strong> '+escapeHtml(comments)+'</p>'; }
+  document.getElementById('rowDetailContent').innerHTML = html;
+  document.getElementById('rowDetailModal').style.display = 'flex';
+}
+document.getElementById('rowDetailClose').addEventListener('click', function(){ document.getElementById('rowDetailModal').style.display = 'none'; });
+document.getElementById('rowDetailModal').addEventListener('click', function(e){ if(e.target.id === 'rowDetailModal') document.getElementById('rowDetailModal').style.display = 'none'; });
+
+
 function updateSelCount(){ document.getElementById('selCount').textContent = Object.keys(selectedIds).length; }
-document.getElementById('filterSearch').addEventListener('input', renderTable);
-document.getElementById('filterProvince').addEventListener('change', renderTable);
+document.getElementById('filterSearch').addEventListener('input', function(){ tableCurrentPage = 0; renderTable(); });
+document.getElementById('filterProvince').addEventListener('change', function(){ tableCurrentPage = 0; renderTable(); });
 document.getElementById('selectAllBtn').addEventListener('click', function(){
   getFilteredRows().forEach(function(r){ selectedIds[r.id] = true; });
   renderTable();
@@ -718,7 +1028,60 @@ document.querySelectorAll('.settings-subnav-item').forEach(function(el){
     document.querySelectorAll('.settings-page').forEach(function(p){p.classList.remove('active');});
     document.getElementById('settings-'+el.dataset.settingstab).classList.add('active');
     if(el.dataset.settingstab === 'activity') loadActivity();
+    if(el.dataset.settingstab === 'general') loadGeneralSettings();
   });
+});
+
+/* ===== General settings (project description + danger zone) ===== */
+async function loadGeneralSettings(){
+  const meta = SURVEY_META[selectedType];
+  document.getElementById('genProjectName').textContent = meta.title;
+  document.getElementById('genDangerTypeName').textContent = meta.title;
+  document.getElementById('genSaveStatus').textContent = '';
+  document.getElementById('genDescription').value = meta.desc;
+  try{
+    const result = await supabaseClient.from('survey_settings').select('*').eq('survey_type', selectedType).maybeSingle();
+    if(!result.error && result.data && result.data.description){
+      document.getElementById('genDescription').value = result.data.description;
+    }
+  }catch(e){ /* fall back to default description already set above */ }
+}
+document.getElementById('genSaveBtn').addEventListener('click', async function(){
+  const btn = document.getElementById('genSaveBtn');
+  const desc = document.getElementById('genDescription').value.trim();
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try{
+    const result = await supabaseClient.from('survey_settings').upsert({ survey_type: selectedType, description: desc, updated_at: new Date().toISOString() });
+    if(result.error){ toast('Could not save: '+result.error.message); return; }
+    SURVEY_META[selectedType].desc = desc;
+    renderSummary();
+    document.getElementById('genSaveStatus').textContent = 'Saved just now';
+    logActivity('Updated description', SURVEY_META[selectedType].title);
+  }catch(err){
+    toast('Could not save changes. Check your connection.');
+  }finally{
+    btn.disabled = false; btn.textContent = 'Save Changes';
+  }
+});
+document.getElementById('genDeleteBtn').addEventListener('click', async function(){
+  const meta = SURVEY_META[selectedType];
+  const count = rowsForSelectedType().length;
+  if(!confirm('This permanently deletes all '+count+' submitted '+meta.title+' record(s) from your KUKA account. Export a backup first if you need one. Continue?')) return;
+  if(!confirm('Are you absolutely sure? This cannot be undone.')) return;
+  const btn = document.getElementById('genDeleteBtn');
+  btn.disabled = true; btn.textContent = 'Deleting…';
+  try{
+    const result = await supabaseClient.from('surveys').delete().eq('survey_type', selectedType);
+    if(result.error){ toast('Could not delete: '+result.error.message); return; }
+    toast('Deleted all '+meta.title+' data');
+    logActivity('Deleted all data', meta.title+' — '+count+' record'+(count===1?'':'s'));
+    selectedIds = {};
+    await loadAllData();
+  }catch(err){
+    toast('Could not delete. Check your connection.');
+  }finally{
+    btn.disabled = false; btn.textContent = 'Delete Project and Data';
+  }
 });
 
 /* ===== Activity log ===== */
