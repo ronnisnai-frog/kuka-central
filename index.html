@@ -106,6 +106,13 @@
   .team-member{ display:flex; align-items:center; gap:10px; padding:8px 0; font-size:0.85rem; }
   .avatar{ width:30px; height:30px; border-radius:50%; background:var(--mangrove-mid); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.8rem; flex:none; }
 
+  .settings-subnav-item{ display:block; width:100%; text-align:left; background:none; border:none; padding:11px 14px; font-size:0.85rem; font-weight:600;
+    color:var(--tide); cursor:pointer; font-family:inherit; border-radius:8px; margin-bottom:2px; }
+  .settings-subnav-item:hover{ background:var(--sand-dim); }
+  .settings-subnav-item.active{ background:var(--paper); color:var(--shell-dim); box-shadow:0 2px 6px rgba(27,46,40,0.08); }
+  .settings-page{ display:none; }
+  .settings-page.active{ display:block; }
+
   .btn{ display:inline-block; padding:11px 18px; border-radius:8px; font-weight:700; font-size:0.88rem; border:none; cursor:pointer; font-family:inherit; transition:all .15s ease; }
   .btn-primary{ background:var(--shell); color:#fff; box-shadow:0 4px 12px rgba(196,98,45,0.3); }
   .btn-primary:hover{ box-shadow:0 5px 16px rgba(196,98,45,0.42); transform:translateY(-1px); }
@@ -113,6 +120,7 @@
   .btn-secondary{ background:none; color:var(--mangrove-mid); border:1.5px solid var(--mangrove-mid); }
   .btn-secondary:hover{ background:rgba(45,74,62,0.06); }
   .btn-ghost{ background:none; color:var(--tide); border:1.5px solid var(--line); font-weight:600; font-size:0.82rem; padding:8px 14px; }
+  .btn-ghost:disabled{ opacity:0.35; cursor:default; }
   .btn-ghost:hover{ background:rgba(74,102,112,0.08); }
 
   .toggle-row{ display:flex; gap:8px; margin-bottom:16px; }
@@ -271,7 +279,12 @@
             </div>
 
             <div id="dataMapView" style="display:none;">
-              <p class="sub" style="margin-bottom:12px;">GPS-tagged submissions for this survey type.</p>
+              <p class="sub" style="margin-bottom:8px;">GPS-tagged submissions for this survey type.</p>
+              <div style="display:flex; gap:16px; margin-bottom:12px; font-size:0.78rem; color:var(--tide);">
+                <span><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#C4622D; margin-right:5px;"></span>Mud Crab</span>
+                <span><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#5B4A8A; margin-right:5px;"></span>Socio-economic</span>
+                <span><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#2D4A3E; margin-right:5px;"></span>Biological</span>
+              </div>
               <div id="mapView"></div>
             </div>
           </div>
@@ -279,11 +292,52 @@
 
         <!-- ===== SETTINGS ===== -->
         <section class="page" id="page-settings">
-          <div class="card">
-            <h3>Team Access</h3>
-            <p class="sub">Manage who can request access from the Users tab. Portal (KUKA Central) access is currently limited to a single admin account.</p>
-            <div class="divider-fancy"><div class="dash"></div><div class="mark"></div><div class="dash"></div></div>
-            <div class="team-member"><div class="avatar">R</div><div>ronnisnai123@gmail.com — Admin (Portal + Mobile)</div></div>
+          <div style="display:flex; gap:20px; align-items:flex-start;">
+            <div id="settingsSubnav" style="width:150px; flex:none;">
+              <button class="settings-subnav-item active" data-settingstab="general">⚙️ General</button>
+              <button class="settings-subnav-item" data-settingstab="activity">🕘 Activity</button>
+            </div>
+            <div style="flex:1; min-width:0;">
+
+              <div class="settings-page active" id="settings-general">
+                <div class="card">
+                  <h3>Team Access</h3>
+                  <p class="sub">Manage who can request access from the Users tab. Portal (KUKA Central) access is currently limited to a single admin account.</p>
+                  <div class="divider-fancy"><div class="dash"></div><div class="mark"></div><div class="dash"></div></div>
+                  <div class="team-member"><div class="avatar">R</div><div>ronnisnai123@gmail.com — Admin (Portal + Mobile)</div></div>
+                </div>
+              </div>
+
+              <div class="settings-page" id="settings-activity">
+                <div class="card">
+                  <div class="toolbar">
+                    <h3 style="margin:0;">Recent Activity</h3>
+                    <div class="actions">
+                      <select id="activityFilter">
+                        <option value="">Filter by: All events</option>
+                        <option value="Logged in">Logged in</option>
+                        <option value="Exported">Exported data</option>
+                      </select>
+                      <button class="btn btn-secondary" id="activityExportBtn">⬇️ Export All Data</button>
+                    </div>
+                  </div>
+                  <div class="table-wrap">
+                    <table>
+                      <thead><tr><th>Event Description</th><th>Date</th></tr></thead>
+                      <tbody id="activityTableBody"><tr><td colspan="2" style="padding:18px;">Loading…</td></tr></tbody>
+                    </table>
+                  </div>
+                  <div class="toolbar" style="margin-top:12px;">
+                    <span style="font-size:0.8rem; color:var(--tide);" id="activityPageLabel">Page 1</span>
+                    <div class="actions">
+                      <button class="btn-ghost" id="activityPrevBtn">‹ Prev</button>
+                      <button class="btn-ghost" id="activityNextBtn">Next ›</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
         </section>
 
@@ -351,6 +405,7 @@ function showApp(){
   document.getElementById('appShell').classList.add('show');
   document.getElementById('topbarUser').textContent = currentUser.email;
   loadAllData();
+  logActivity('Logged in');
 }
 document.getElementById('loginBtn').addEventListener('click', async function(){
   const email = document.getElementById('loginEmail').value.trim();
@@ -642,6 +697,7 @@ function exportTypeAsExcel(type){
   const wb = buildWorkbookForType(type, rows);
   XLSX.writeFile(wb, 'kuka_'+type+'_'+Date.now()+'.xlsx');
   toast('Exported '+rows.length+' surveys');
+  logActivity('Exported', SURVEY_META[type].title+' — '+rows.length+' survey'+(rows.length===1?'':'s'));
 }
 document.getElementById('exportAllBtn').addEventListener('click', function(){ exportTypeAsExcel(selectedType); });
 document.getElementById('exportSelectedBtn').addEventListener('click', function(){
@@ -651,9 +707,101 @@ document.getElementById('exportSelectedBtn').addEventListener('click', function(
   const wb = buildWorkbookForType(selectedType, rows);
   XLSX.writeFile(wb, 'kuka_'+selectedType+'_selected_'+Date.now()+'.xlsx');
   toast('Exported '+rows.length+' selected survey'+(rows.length===1?'':'s'));
+  logActivity('Exported', SURVEY_META[selectedType].title+' — '+rows.length+' selected survey'+(rows.length===1?'':'s'));
+});
+
+/* ===== Settings sub-navigation ===== */
+document.querySelectorAll('.settings-subnav-item').forEach(function(el){
+  el.addEventListener('click', function(){
+    document.querySelectorAll('.settings-subnav-item').forEach(function(b){b.classList.remove('active');});
+    el.classList.add('active');
+    document.querySelectorAll('.settings-page').forEach(function(p){p.classList.remove('active');});
+    document.getElementById('settings-'+el.dataset.settingstab).classList.add('active');
+    if(el.dataset.settingstab === 'activity') loadActivity();
+  });
+});
+
+/* ===== Activity log ===== */
+async function logActivity(action, details){
+  if(!currentUser) return;
+  try{
+    await supabaseClient.from('activity_log').insert({ actor_email: currentUser.email, action: action, details: details || null });
+  }catch(e){ /* logging failures shouldn't interrupt the user */ }
+}
+
+let activityAllRows = [];
+let activityPage = 0;
+const ACTIVITY_PAGE_SIZE = 10;
+
+async function loadActivity(){
+  const tbody = document.getElementById('activityTableBody');
+  tbody.innerHTML = '<tr><td colspan="2" style="padding:18px;">Loading…</td></tr>';
+  try{
+    const result = await supabaseClient.from('activity_log').select('*').order('created_at', { ascending:false });
+    if(result.error){
+      tbody.innerHTML = '<tr><td colspan="2" style="padding:18px;">Could not load activity: '+escapeHtml(result.error.message)+'</td></tr>';
+      return;
+    }
+    activityAllRows = result.data || [];
+    activityPage = 0;
+    renderActivity();
+  }catch(err){
+    tbody.innerHTML = '<tr><td colspan="2" style="padding:18px;">Could not load activity. Check your connection.</td></tr>';
+  }
+}
+function getFilteredActivity(){
+  const f = document.getElementById('activityFilter').value;
+  if(!f) return activityAllRows;
+  return activityAllRows.filter(function(r){ return r.action === f; });
+}
+function renderActivity(){
+  const rows = getFilteredActivity();
+  const tbody = document.getElementById('activityTableBody');
+  const totalPages = Math.max(1, Math.ceil(rows.length / ACTIVITY_PAGE_SIZE));
+  activityPage = Math.min(activityPage, totalPages - 1);
+  const pageRows = rows.slice(activityPage * ACTIVITY_PAGE_SIZE, (activityPage+1) * ACTIVITY_PAGE_SIZE);
+  tbody.innerHTML = '';
+  if(pageRows.length === 0){
+    tbody.innerHTML = '<tr><td colspan="2" style="padding:18px;">No activity recorded yet.</td></tr>';
+  } else {
+    pageRows.forEach(function(r){
+      const who = (r.actor_email||'').split('@')[0];
+      const desc = who+' — '+r.action+(r.details ? (': '+r.details) : '');
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td>'+escapeHtml(desc)+'</td><td>'+(r.created_at ? new Date(r.created_at).toLocaleDateString() : '—')+'</td>';
+      tbody.appendChild(tr);
+    });
+  }
+  document.getElementById('activityPageLabel').textContent = 'Page '+(activityPage+1)+' of '+totalPages;
+  document.getElementById('activityPrevBtn').disabled = activityPage === 0;
+  document.getElementById('activityNextBtn').disabled = activityPage >= totalPages - 1;
+}
+document.getElementById('activityFilter').addEventListener('change', function(){ activityPage = 0; renderActivity(); });
+document.getElementById('activityPrevBtn').addEventListener('click', function(){ if(activityPage>0){ activityPage--; renderActivity(); } });
+document.getElementById('activityNextBtn').addEventListener('click', function(){ activityPage++; renderActivity(); });
+document.getElementById('activityExportBtn').addEventListener('click', function(){
+  if(allRows.length === 0){ toast('No data to export yet.'); return; }
+  const wb = XLSX.utils.book_new();
+  ['mudcrab','socioeconomic','biological'].forEach(function(type){
+    const rows = allRows.filter(function(r){ return r.survey_type === type; });
+    if(rows.length === 0) return;
+    const typeWb = buildWorkbookForType(type, rows);
+    typeWb.SheetNames.forEach(function(name){ XLSX.utils.book_append_sheet(wb, typeWb.Sheets[name], name); });
+  });
+  XLSX.writeFile(wb, 'kuka_all_data_'+Date.now()+'.xlsx');
+  toast('Exported all survey data ('+allRows.length+' total)');
+  logActivity('Exported', 'All surveys — '+allRows.length+' total');
 });
 
 /* ===== Map ===== */
+const TYPE_COLORS = { mudcrab:'#C4622D', socioeconomic:'#5B4A8A', biological:'#2D4A3E' };
+function coloredMarkerIcon(color){
+  return L.divIcon({
+    className: '',
+    html: '<div style="width:16px; height:16px; border-radius:50%; background:'+color+'; border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>',
+    iconSize: [16,16], iconAnchor: [8,8], popupAnchor: [0,-8]
+  });
+}
 function renderMap(){
   if(typeof L === 'undefined') return;
   if(!mapInst){
@@ -663,10 +811,11 @@ function renderMap(){
   }
   mapInst._markerLayer.clearLayers();
   const points = [];
+  const icon = coloredMarkerIcon(TYPE_COLORS[selectedType] || '#4A6670');
   rowsForSelectedType().forEach(function(r){
     const gps = getGps(r);
     if(!gps) return;
-    const marker = L.marker([gps.lat, gps.lon]).addTo(mapInst._markerLayer);
+    const marker = L.marker([gps.lat, gps.lon], { icon: icon }).addTo(mapInst._markerLayer);
     marker.bindPopup('<strong>'+escapeHtml(getLabel(r))+'</strong><br>'+(r.survey_date||'')+' · '+escapeHtml(r.surveyor1||''));
     points.push([gps.lat, gps.lon]);
   });
