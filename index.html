@@ -66,7 +66,7 @@
 
   #sidebar{ width:250px; flex:none; background:var(--paper); border-right:1px solid var(--line); min-height:calc(100vh - 96px); padding:18px 0; }
   .sidebar-label{ padding:8px 20px; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--tide); font-weight:700; }
-  .survey-item{ padding:12px 20px; font-size:0.88rem; cursor:pointer; border-left:3px solid transparent; font-weight:600; }
+  .survey-item{ padding:12px 20px; font-size:0.74rem; cursor:pointer; border-left:3px solid transparent; font-weight:600; white-space:nowrap; letter-spacing:0.1px; }
   .survey-item:hover{ background:var(--sand-dim); }
   .survey-item.active{ background:var(--sand-dim); border-left-color:var(--shell); color:var(--shell-dim); }
 
@@ -117,6 +117,7 @@
   .btn-primary{ background:var(--shell); color:#fff; box-shadow:0 4px 12px rgba(196,98,45,0.3); }
   .btn-primary:hover{ box-shadow:0 5px 16px rgba(196,98,45,0.42); transform:translateY(-1px); }
   .btn-primary:disabled{ opacity:0.4; cursor:default; box-shadow:none; transform:none; }
+  .btn:disabled{ opacity:0.35; cursor:default; }
   .btn-secondary{ background:none; color:var(--mangrove-mid); border:1.5px solid var(--mangrove-mid); }
   .btn-secondary:hover{ background:rgba(45,74,62,0.06); }
   .btn-ghost{ background:none; color:var(--tide); border:1.5px solid var(--line); font-weight:600; font-size:0.82rem; padding:8px 14px; }
@@ -202,7 +203,7 @@
 
 <div id="appShell">
   <div id="topbar">
-    <div class="title"><img src="./mudcrab-icon.png" class="brand-logo" alt=""> KUKA Central</div>
+    <div class="title"><img src="./mudcrab-icon.png" class="brand-logo" alt=""> KUKA Central<span id="topbarSurveyName" style="font-weight:400; color:#B9C9BE;"></span></div>
     <div class="right">
       <span class="userlabel" id="topbarUser">—</span>
       <span class="badge">Admin</span>
@@ -276,13 +277,14 @@
 
         <!-- ===== DATA ===== -->
         <section class="page" id="page-data">
-          <div class="card">
-            <div class="toggle-row">
-              <button class="active" id="dataViewTableBtn">📋 Table</button>
-              <button id="dataViewMapBtn">🗺️ Map</button>
-              <button id="dataViewGalleryBtn">🖼️ Gallery</button>
-              <button id="dataViewReportsBtn">📈 Reports</button>
+          <div style="display:flex; gap:20px; align-items:flex-start;">
+            <div id="dataSubnav" style="width:130px; flex:none;">
+              <button class="settings-subnav-item active" id="dataViewTableBtn">📋 Table</button>
+              <button class="settings-subnav-item" id="dataViewReportsBtn">📈 Reports</button>
+              <button class="settings-subnav-item" id="dataViewGalleryBtn">🖼️ Gallery</button>
+              <button class="settings-subnav-item" id="dataViewMapBtn">🗺️ Map</button>
             </div>
+            <div class="card" style="flex:1; min-width:0;">
 
             <div id="dataTableView">
               <div class="filters">
@@ -364,6 +366,7 @@
                 ⚠️ This is an automated report based on raw data submitted to this project. Please review before using these figures externally.
               </div>
               <div id="reportsGrid"></div>
+            </div>
             </div>
           </div>
         </section>
@@ -532,6 +535,7 @@ function showApp(){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appShell').classList.add('show');
   document.getElementById('topbarUser').textContent = currentUser.email;
+  updateTopbarSurveyName();
   loadAllData();
   logActivity('Logged in');
 }
@@ -590,6 +594,7 @@ document.querySelectorAll('.survey-item').forEach(function(el){
     selectedType = el.dataset.survey;
     selectedIds = {};
     tableCurrentPage = 0;
+    updateTopbarSurveyName();
     renderSummary();
     renderProvinceFilter();
     renderTable();
@@ -599,6 +604,10 @@ document.querySelectorAll('.survey-item').forEach(function(el){
     if(document.getElementById('dataReportsView').style.display !== 'none'){ renderReports(); }
   });
 });
+function updateTopbarSurveyName(){
+  const meta = SURVEY_META[selectedType];
+  document.getElementById('topbarSurveyName').textContent = meta ? (' · '+meta.title) : '';
+}
 
 /* ===== Quick links ===== */
 document.getElementById('qlTable').addEventListener('click', function(){ goToTab('data'); showDataView('table'); });
