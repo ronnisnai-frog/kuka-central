@@ -524,14 +524,51 @@
 </div>
 
 <div id="privacyModal" style="position:fixed; inset:0; background:rgba(27,46,40,0.5); z-index:400; display:none; align-items:center; justify-content:center; padding:24px;">
-  <div style="background:var(--paper); border-radius:12px; padding:24px; max-width:520px; width:100%; max-height:80vh; overflow-y:auto;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+  <div style="background:var(--paper); border-radius:12px; padding:24px; max-width:560px; width:100%; max-height:82vh; overflow-y:auto;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
       <h3 style="margin:0;">Data &amp; Privacy Policy</h3>
       <button id="privacyModalClose" style="background:none; border:none; font-size:1.3rem; cursor:pointer; color:var(--tide);">✕</button>
     </div>
-    <p class="sub" style="margin-bottom:10px;">Some KUKA surveys collect personal information about respondents, including names, ages, and contact details. This information is collected only with the respondent's consent, and is used solely for fisheries research and management purposes.</p>
-    <p class="sub">Respondent data is stored securely and is only accessible to approved surveyors and administrators — it is never shared publicly or used for any purpose beyond this research. Surveyors are responsible for explaining the purpose of the survey and obtaining consent before recording respondent information.</p>
-    <p class="sub" style="margin-top:14px; font-size:0.72rem; color:var(--tide);">This is a preliminary policy and may be updated.</p>
+    <p class="sub" style="margin-bottom:16px; font-size:0.72rem;">Last updated: August 2026</p>
+
+    <h4 style="margin:14px 0 4px; font-size:0.88rem; color:var(--mangrove-dark);">Overview</h4>
+    <p class="sub">KUKA is a fisheries survey system used by approved surveyors to collect data on mud crab and coconut crab populations in Papua New Guinea. This policy explains what information KUKA collects, why, who can see it, and how it's protected.</p>
+
+    <h4 style="margin:14px 0 4px; font-size:0.88rem; color:var(--mangrove-dark);">Information We Collect</h4>
+    <p class="sub"><strong>Surveyor account information</strong> — full name and email, to create and manage your account.</p>
+    <p class="sub" style="margin-top:6px;"><strong>Field and specimen data</strong> — for Mud Crab and Biological surveys: GPS location, date and time, species, sex, measurements, habitat notes, and optional specimen photographs.</p>
+    <p class="sub" style="margin-top:6px;"><strong>Respondent information (Socio-economic Survey only)</strong> — full name, age, gender, marital status, village and province, contact details, and answers about livelihood, harvesting, and household circumstances.</p>
+    <p class="sub" style="margin-top:6px;"><strong>Device and location data</strong> — GPS provided automatically, entered manually, or selected on a map.</p>
+
+    <h4 style="margin:14px 0 4px; font-size:0.88rem; color:var(--mangrove-dark);">Why We Collect This Information</h4>
+    <p class="sub">This data is collected solely to support fisheries stock assessment and coastal community research in Papua New Guinea. It helps the KUKA research team understand crab populations, harvesting patterns, and the livelihoods connected to them, in order to inform sustainable fisheries management.</p>
+
+    <h4 style="margin:14px 0 4px; font-size:0.88rem; color:var(--mangrove-dark);">Respondent Consent</h4>
+    <p class="sub">Before recording any Socio-economic survey, the surveyor is required to explain the purpose of the survey to the respondent and obtain their verbal consent. Respondents may decline to participate, or decline to answer any individual question, without consequence. Consent is recorded as part of each submission.</p>
+
+    <h4 style="margin:14px 0 4px; font-size:0.88rem; color:var(--mangrove-dark);">Who Can Access This Information</h4>
+    <p class="sub">Surveyors can see and edit their own submitted surveys. Administrators can view, review, export, correct, or delete data across all surveys through KUKA Central. No one outside the KUKA surveyor and admin team has access to this data.</p>
+
+    <h4 style="margin:14px 0 4px; font-size:0.88rem; color:var(--mangrove-dark);">Data Storage &amp; Security</h4>
+    <p class="sub">Data is stored using Supabase, a secure cloud database provider, with access controls restricting who can read or modify each record. KUKA Collect also stores unsynced survey data locally on the surveyor's device until it is uploaded.</p>
+
+    <h4 style="margin:14px 0 4px; font-size:0.88rem; color:var(--mangrove-dark);">Data Retention</h4>
+    <p class="sub">Survey data is retained for as long as it is needed for research and fisheries management purposes. Administrators can permanently delete individual surveys or entire datasets through KUKA Central when data is no longer needed.</p>
+
+    <h4 style="margin:14px 0 4px; font-size:0.88rem; color:var(--mangrove-dark);">Right to Deletion</h4>
+    <p class="sub">A respondent may request that their personal information be removed from KUKA. Requests can be made through the surveyor who conducted the interview, or directly to a KUKA administrator, and will be honored where technically possible.</p>
+
+    <h4 style="margin:14px 0 4px; font-size:0.88rem; color:var(--mangrove-dark);">No Third-Party Sharing</h4>
+    <p class="sub">Respondent and survey data is never sold, shared, or made available to third parties outside the KUKA research and administration team, except where required by law.</p>
+
+    <h4 style="margin:14px 0 4px; font-size:0.88rem; color:var(--mangrove-dark);">Specimen Photos</h4>
+    <p class="sub">Photographs taken during Mud Crab and Biological surveys are of crab specimens, not people, and are used to verify field measurements and species identification.</p>
+
+    <h4 style="margin:14px 0 4px; font-size:0.88rem; color:var(--mangrove-dark);">Changes to This Policy</h4>
+    <p class="sub">This policy may be updated as KUKA's features evolve. Material changes will be reflected here with an updated date.</p>
+
+    <h4 style="margin:14px 0 4px; font-size:0.88rem; color:var(--mangrove-dark);">Questions</h4>
+    <p class="sub">Questions about this policy or about your data can be directed to your KUKA administrator.</p>
   </div>
 </div>
 
