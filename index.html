@@ -70,7 +70,7 @@
   .survey-item:hover{ background:var(--sand-dim); }
   .survey-item.active{ background:var(--sand-dim); border-left-color:var(--shell); color:var(--shell-dim); }
 
-  #main{ flex:1; padding:26px 30px; display:flex; gap:22px; }
+  #main{ flex:1; padding:26px 30px; display:flex; gap:22px; min-width:0; }
   #centerCol{ flex:1; min-width:0; }
   #rightCol{ width:270px; flex:none; }
   .page{ display:none; }
@@ -277,7 +277,7 @@
 
         <!-- ===== DATA ===== -->
         <section class="page" id="page-data">
-          <div style="display:flex; gap:20px; align-items:flex-start;">
+          <div style="display:flex; gap:20px; align-items:flex-start; min-width:0;">
             <div id="dataSubnav" style="width:130px; flex:none;">
               <button class="settings-subnav-item active" id="dataViewTableBtn">📋 Table</button>
               <button class="settings-subnav-item" id="dataViewReportsBtn">📈 Reports</button>
