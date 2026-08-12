@@ -208,9 +208,39 @@
     <div class="title"><img src="./mudcrab-icon.png" class="brand-logo" alt=""> KUKA Central</div>
     <div class="centerName" id="topbarSurveyName"></div>
     <div class="right">
-      <span class="userlabel" id="topbarUser">—</span>
-      <span class="badge">Admin</span>
-      <button id="logoutBtn">Log Out</button>
+      <div style="position:relative;">
+        <button id="avatarBtn" class="avatar" style="cursor:pointer; border:none; font-size:0.85rem;">—</button>
+        <div id="accountMenu" style="display:none; position:absolute; top:46px; right:0; background:var(--paper); border:1px solid var(--line); border-radius:10px;
+          box-shadow:0 8px 24px rgba(27,46,40,0.2); z-index:100; min-width:230px; padding:14px 0; color:var(--ink); text-align:left;">
+          <div style="padding:0 16px 12px;">
+            <div style="font-weight:700; font-size:0.95rem;" id="accountMenuName">—</div>
+            <div style="font-size:0.78rem; color:var(--tide); margin-top:2px;" id="accountMenuEmail">—</div>
+          </div>
+          <div style="border-top:1px solid var(--sand-dim);"></div>
+          <button class="quicklink" id="privacyPolicyBtn" style="padding:11px 16px;"><i data-lucide="shield-check" class="lucide-icon"></i> Data &amp; Privacy Policy</button>
+          <div style="border-top:1px solid var(--sand-dim);"></div>
+          <div style="padding:10px 16px 4px;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:0.86rem; font-weight:600; cursor:pointer;">
+              <i data-lucide="languages" class="lucide-icon"></i> Language
+            </label>
+            <select id="languageSelect" style="width:100%; margin-top:8px; padding:8px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.85rem; background:var(--sand);">
+              <option value="en" selected>English</option>
+              <option value="es">Spanish</option>
+              <option value="fr">French</option>
+              <option value="pt">Portuguese</option>
+              <option value="de">German</option>
+              <option value="ar">Arabic</option>
+              <option value="zh">Chinese (Simplified)</option>
+              <option value="hi">Hindi</option>
+              <option value="ru">Russian</option>
+              <option value="ja">Japanese</option>
+            </select>
+            <p style="font-size:0.7rem; color:var(--tide); margin:6px 0 0;">Translates the menu and screen titles. Data stays in English.</p>
+          </div>
+          <div style="border-top:1px solid var(--sand-dim); margin-top:10px;"></div>
+          <button class="quicklink" id="logoutBtn" style="padding:12px 16px; color:var(--alert); font-weight:700;"><i data-lucide="log-out" class="lucide-icon"></i> Log Out</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -493,6 +523,18 @@
   </div>
 </div>
 
+<div id="privacyModal" style="position:fixed; inset:0; background:rgba(27,46,40,0.5); z-index:400; display:none; align-items:center; justify-content:center; padding:24px;">
+  <div style="background:var(--paper); border-radius:12px; padding:24px; max-width:520px; width:100%; max-height:80vh; overflow-y:auto;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <h3 style="margin:0;">Data &amp; Privacy Policy</h3>
+      <button id="privacyModalClose" style="background:none; border:none; font-size:1.3rem; cursor:pointer; color:var(--tide);">✕</button>
+    </div>
+    <p class="sub" style="margin-bottom:10px;">Some KUKA surveys collect personal information about respondents, including names, ages, and contact details. This information is collected only with the respondent's consent, and is used solely for fisheries research and management purposes.</p>
+    <p class="sub">Respondent data is stored securely and is only accessible to approved surveyors and administrators — it is never shared publicly or used for any purpose beyond this research. Surveyors are responsible for explaining the purpose of the survey and obtaining consent before recording respondent information.</p>
+    <p class="sub" style="margin-top:14px; font-size:0.72rem; color:var(--tide);">This is a preliminary policy and may be updated.</p>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -538,10 +580,21 @@ function showLogin(msg){
     e.textContent = msg; e.classList.add('show');
   }
 }
+function getInitials(name, email){
+  if(name && name.trim()){
+    const parts = name.trim().split(/\s+/);
+    if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
+    return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+  }
+  return (email || '?').slice(0,2).toUpperCase();
+}
 function showApp(){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appShell').classList.add('show');
-  document.getElementById('topbarUser').textContent = currentUser.email;
+  const fullName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || '';
+  document.getElementById('avatarBtn').textContent = getInitials(fullName, currentUser.email);
+  document.getElementById('accountMenuName').textContent = fullName || 'Admin';
+  document.getElementById('accountMenuEmail').textContent = currentUser.email;
   updateTopbarSurveyName();
   loadAllData();
   logActivity('Logged in');
@@ -578,6 +631,59 @@ document.getElementById('logoutBtn').addEventListener('click', async function(){
   currentUser = null;
   showLogin();
 });
+
+/* ===== Account menu dropdown ===== */
+document.getElementById('avatarBtn').addEventListener('click', function(e){
+  e.stopPropagation();
+  const menu = document.getElementById('accountMenu');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+});
+document.addEventListener('click', function(e){
+  const menu = document.getElementById('accountMenu');
+  if(menu.style.display === 'block' && !menu.contains(e.target) && e.target.id !== 'avatarBtn'){ menu.style.display = 'none'; }
+});
+
+/* ===== Data & Privacy Policy modal ===== */
+document.getElementById('privacyPolicyBtn').addEventListener('click', function(){
+  document.getElementById('accountMenu').style.display = 'none';
+  document.getElementById('privacyModal').style.display = 'flex';
+});
+document.getElementById('privacyModalClose').addEventListener('click', function(){ document.getElementById('privacyModal').style.display = 'none'; });
+document.getElementById('privacyModal').addEventListener('click', function(e){ if(e.target.id === 'privacyModal') document.getElementById('privacyModal').style.display = 'none'; });
+
+/* ===== Language (scoped chrome translation, matching KUKA Collect) ===== */
+const CENTRAL_TRANSLATIONS = {
+  en:{ summary:'Summary', users:'Users', data:'Data', settings:'Settings', surveys:'Surveys', logout:'Log Out' },
+  es:{ summary:'Resumen', users:'Usuarios', data:'Datos', settings:'Configuración', surveys:'Encuestas', logout:'Cerrar sesión' },
+  fr:{ summary:'Résumé', users:'Utilisateurs', data:'Données', settings:'Paramètres', surveys:'Enquêtes', logout:'Déconnexion' },
+  pt:{ summary:'Resumo', users:'Usuários', data:'Dados', settings:'Configurações', surveys:'Pesquisas', logout:'Sair' },
+  de:{ summary:'Übersicht', users:'Benutzer', data:'Daten', settings:'Einstellungen', surveys:'Umfragen', logout:'Abmelden' },
+  ar:{ summary:'الملخص', users:'المستخدمون', data:'البيانات', settings:'الإعدادات', surveys:'الاستطلاعات', logout:'تسجيل الخروج' },
+  zh:{ summary:'摘要', users:'用户', data:'数据', settings:'设置', surveys:'调查', logout:'登出' },
+  hi:{ summary:'सारांश', users:'उपयोगकर्ता', data:'डेटा', settings:'सेटिंग्स', surveys:'सर्वेक्षण', logout:'लॉग आउट' },
+  ru:{ summary:'Сводка', users:'Пользователи', data:'Данные', settings:'Настройки', surveys:'Опросы', logout:'Выйти' },
+  ja:{ summary:'サマリー', users:'ユーザー', data:'データ', settings:'設定', surveys:'調査', logout:'ログアウト' }
+};
+function applyCentralLanguage(lang){
+  const t = CENTRAL_TRANSLATIONS[lang] || CENTRAL_TRANSLATIONS.en;
+  document.querySelector('#subtabs button[data-tab="summary"]').textContent = t.summary;
+  document.querySelector('#subtabs button[data-tab="users"]').textContent = t.users;
+  document.querySelector('#subtabs button[data-tab="data"]').textContent = t.data;
+  document.querySelector('#subtabs button[data-tab="settings"]').textContent = t.settings;
+  document.querySelector('#sidebar .sidebar-label').textContent = t.surveys;
+  const logoutTextNode = document.getElementById('logoutBtn');
+  logoutTextNode.innerHTML = '<i data-lucide="log-out" class="lucide-icon"></i> ' + t.logout;
+  refreshLucideIcons();
+}
+document.getElementById('languageSelect').addEventListener('change', function(e){
+  const lang = e.target.value;
+  try{ localStorage.setItem('kuka_central_lang', lang); }catch(err){}
+  applyCentralLanguage(lang);
+});
+try{
+  const savedLang = localStorage.getItem('kuka_central_lang');
+  if(savedLang){ document.getElementById('languageSelect').value = savedLang; applyCentralLanguage(savedLang); }
+}catch(err){}
 
 /* ===== Top-level tab navigation ===== */
 document.querySelectorAll('#subtabs button').forEach(function(el){
