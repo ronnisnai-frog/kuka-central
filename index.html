@@ -113,6 +113,8 @@
   .settings-subnav-item:hover{ background:var(--sand-dim); }
   .settings-subnav-item.active{ background:var(--paper); color:var(--shell-dim); box-shadow:0 2px 6px rgba(27,46,40,0.08); }
   .settings-page{ display:none; }
+  .acc-page{ display:none; }
+  .acc-page.active{ display:block; }
   .settings-page.active{ display:block; }
 
   .btn{ display:inline-block; padding:11px 18px; border-radius:8px; font-weight:700; font-size:0.88rem; border:none; cursor:pointer; font-family:inherit; transition:all .15s ease; }
@@ -216,6 +218,8 @@
             <div style="font-weight:700; font-size:0.95rem;" id="accountMenuName">—</div>
             <div style="font-size:0.78rem; color:var(--tide); margin-top:2px;" id="accountMenuEmail">—</div>
           </div>
+          <div style="border-top:1px solid var(--sand-dim);"></div>
+          <button class="quicklink" id="accountSettingsBtn" style="padding:11px 16px;"><i data-lucide="user-cog" class="lucide-icon"></i> Account Settings</button>
           <div style="border-top:1px solid var(--sand-dim);"></div>
           <button class="quicklink" id="privacyPolicyBtn" style="padding:11px 16px;"><i data-lucide="shield-check" class="lucide-icon"></i> Data &amp; Privacy Policy</button>
           <div style="border-top:1px solid var(--sand-dim);"></div>
@@ -495,6 +499,95 @@
   </div>
 </div>
 
+<div id="accountSettingsView" style="display:none; padding:26px 30px;">
+  <button id="accountSettingsBack" class="btn-ghost" style="margin-bottom:18px;"><i data-lucide="arrow-left" class="lucide-icon"></i> Back to Dashboard</button>
+  <div style="display:flex; gap:22px; align-items:flex-start; max-width:900px;">
+    <div style="width:150px; flex:none;">
+      <button class="settings-subnav-item active" data-acctab="profile"><i data-lucide="user" class="lucide-icon"></i> Profile</button>
+      <button class="settings-subnav-item" data-acctab="security"><i data-lucide="lock" class="lucide-icon"></i> Security</button>
+    </div>
+
+    <div style="flex:1; min-width:0;">
+      <div class="acc-page active" id="acc-profile">
+        <div class="toolbar" style="margin-bottom:18px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="avatar" id="profileAvatar" style="width:42px; height:42px; font-size:1rem;">—</div>
+            <div style="font-weight:700; font-size:1rem;" id="profileUsername">—</div>
+          </div>
+          <button class="btn btn-primary" id="profileSaveBtn">Save Changes</button>
+        </div>
+
+        <div class="card">
+          <label class="first" style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Full Name *</label>
+          <input type="text" id="profFullName" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand); margin-bottom:16px;">
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div>
+              <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Country *</label>
+              <select id="profCountry" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
+                <option>Papua New Guinea</option>
+                <option>Fiji</option>
+                <option>Solomon Islands</option>
+                <option>Vanuatu</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">City</label>
+              <input type="text" id="profCity" placeholder="e.g. Port Moresby" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div>
+              <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Sector *</label>
+              <select id="profSector" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
+                <option>Fisheries</option>
+                <option>Environment</option>
+                <option>Government</option>
+                <option>Research / Academia</option>
+                <option>NGO</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Organization Type *</label>
+              <select id="profOrgType" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
+                <option>Government Institution</option>
+                <option>Non-Governmental Organization</option>
+                <option>Academic / Research Institution</option>
+                <option>Private Sector</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+
+          <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Organization Name *</label>
+          <input type="text" id="profOrgName" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand); margin-bottom:16px;">
+
+          <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Organization Website</label>
+          <input type="text" id="profOrgWebsite" placeholder="https://…" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand); margin-bottom:16px;">
+
+          <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Bio</label>
+          <input type="text" id="profBio" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
+        </div>
+
+        <div class="card" style="border-color:rgba(178,58,58,0.2); margin-top:20px;">
+          <h3 style="color:var(--alert); margin-bottom:6px;">Delete Account</h3>
+          <p class="sub">Account deletion for KUKA administrators must be handled directly in Supabase, since it affects login access for every surveyor. Contact your database administrator to proceed.</p>
+          <button class="btn" id="profDeleteBtn" style="background:none; color:var(--alert); border:1.5px solid var(--alert); margin-top:8px;">Delete Account</button>
+        </div>
+      </div>
+
+      <div class="acc-page" id="acc-security" style="display:none;">
+        <div class="card">
+          <p class="sub">Security settings coming soon.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="lightbox">
   <button class="lbClose" id="lightboxClose">✕</button>
   <img id="lightboxImg" src="" alt="">
@@ -687,6 +780,78 @@ document.getElementById('privacyPolicyBtn').addEventListener('click', function()
 });
 document.getElementById('privacyModalClose').addEventListener('click', function(){ document.getElementById('privacyModal').style.display = 'none'; });
 document.getElementById('privacyModal').addEventListener('click', function(e){ if(e.target.id === 'privacyModal') document.getElementById('privacyModal').style.display = 'none'; });
+
+/* ===== Account Settings ===== */
+document.getElementById('accountSettingsBtn').addEventListener('click', function(){
+  document.getElementById('accountMenu').style.display = 'none';
+  document.getElementById('subtabs').style.display = 'none';
+  document.getElementById('layout').style.display = 'none';
+  document.getElementById('accountSettingsView').style.display = 'block';
+  loadProfile();
+});
+document.getElementById('accountSettingsBack').addEventListener('click', function(){
+  document.getElementById('accountSettingsView').style.display = 'none';
+  document.getElementById('subtabs').style.display = 'flex';
+  document.getElementById('layout').style.display = 'flex';
+});
+document.querySelectorAll('#accountSettingsView [data-acctab]').forEach(function(el){
+  el.addEventListener('click', function(){
+    document.querySelectorAll('#accountSettingsView [data-acctab]').forEach(function(b){b.classList.remove('active');});
+    el.classList.add('active');
+    document.getElementById('acc-profile').style.display = el.dataset.acctab === 'profile' ? 'block' : 'none';
+    document.getElementById('acc-security').style.display = el.dataset.acctab === 'security' ? 'block' : 'none';
+  });
+});
+
+function loadProfile(){
+  const meta = currentUser.user_metadata || {};
+  const fullName = meta.full_name || '';
+  document.getElementById('profileAvatar').textContent = getInitials(fullName, currentUser.email);
+  document.getElementById('profileUsername').textContent = fullName || currentUser.email;
+  document.getElementById('profFullName').value = fullName;
+  document.getElementById('profCountry').value = meta.country || 'Papua New Guinea';
+  document.getElementById('profCity').value = meta.city || '';
+  document.getElementById('profSector').value = meta.sector || 'Fisheries';
+  document.getElementById('profOrgType').value = meta.org_type || 'Government Institution';
+  document.getElementById('profOrgName').value = meta.org_name || '';
+  document.getElementById('profOrgWebsite').value = meta.org_website || '';
+  document.getElementById('profBio').value = meta.bio || '';
+}
+document.getElementById('profileSaveBtn').addEventListener('click', async function(){
+  const btn = document.getElementById('profileSaveBtn');
+  const fullName = document.getElementById('profFullName').value.trim();
+  if(!fullName){ toast('Full Name is required.'); return; }
+  const orgName = document.getElementById('profOrgName').value.trim();
+  if(!orgName){ toast('Organization Name is required.'); return; }
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try{
+    const result = await supabaseClient.auth.updateUser({ data: {
+      full_name: fullName,
+      country: document.getElementById('profCountry').value,
+      city: document.getElementById('profCity').value.trim(),
+      sector: document.getElementById('profSector').value,
+      org_type: document.getElementById('profOrgType').value,
+      org_name: orgName,
+      org_website: document.getElementById('profOrgWebsite').value.trim(),
+      bio: document.getElementById('profBio').value.trim()
+    }});
+    if(result.error){ toast('Could not save: '+result.error.message); return; }
+    currentUser = result.data.user;
+    document.getElementById('accountMenuName').textContent = fullName;
+    document.getElementById('avatarBtn').textContent = getInitials(fullName, currentUser.email);
+    document.getElementById('profileAvatar').textContent = getInitials(fullName, currentUser.email);
+    document.getElementById('profileUsername').textContent = fullName;
+    toast('Profile saved');
+    logActivity('Updated profile');
+  }catch(err){
+    toast('Could not save changes. Check your connection.');
+  }finally{
+    btn.disabled = false; btn.textContent = 'Save Changes';
+  }
+});
+document.getElementById('profDeleteBtn').addEventListener('click', function(){
+  toast('Account deletion must be handled directly in Supabase — contact your database administrator.');
+});
 
 /* ===== Language (scoped chrome translation, matching KUKA Collect) ===== */
 const CENTRAL_TRANSLATIONS = {
