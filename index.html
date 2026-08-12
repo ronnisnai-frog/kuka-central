@@ -50,12 +50,14 @@
   #appShell.show{ display:block; }
 
   #topbar{ background:var(--mangrove-dark); color:var(--sand); display:flex; align-items:center; justify-content:space-between; padding:12px 22px; }
-  #topbar .title{ display:flex; align-items:center; font-size:1.05rem; font-weight:700; font-family:Georgia,serif; }
-  #topbar .right{ display:flex; align-items:center; gap:14px; }
+  #topbar .title{ display:flex; align-items:center; font-size:1.05rem; font-weight:700; font-family:Georgia,serif; flex:1; }
+  #topbar .centerName{ flex:1; text-align:center; font-size:0.92rem; font-weight:600; color:#D8E4DD; font-family:Georgia,serif; }
+  #topbar .right{ display:flex; align-items:center; gap:14px; flex:1; justify-content:flex-end; }
   #topbar .userlabel{ font-size:0.8rem; color:#B9C9BE; }
   #topbar .badge{ background:var(--shell); color:#fff; font-size:0.68rem; padding:4px 11px; border-radius:10px; font-weight:700; letter-spacing:0.3px; }
   #logoutBtn{ background:none; border:1.5px solid #35473f; color:var(--sand); font-size:0.8rem; font-weight:600; padding:7px 13px; border-radius:7px; cursor:pointer; font-family:inherit; }
   #logoutBtn:hover{ background:#243a33; }
+  .lucide-icon{ width:18px; height:18px; stroke-width:2.2; vertical-align:middle; }
 
   #subtabs{ display:flex; gap:6px; padding:0 22px; background:var(--paper); border-bottom:1px solid var(--line); }
   #subtabs button{ padding:13px 14px; font-size:0.8rem; font-weight:700; color:var(--tide); background:none; border:none; cursor:pointer;
@@ -203,7 +205,8 @@
 
 <div id="appShell">
   <div id="topbar">
-    <div class="title"><img src="./mudcrab-icon.png" class="brand-logo" alt=""> KUKA Central<span id="topbarSurveyName" style="font-weight:400; color:#B9C9BE;"></span></div>
+    <div class="title"><img src="./mudcrab-icon.png" class="brand-logo" alt=""> KUKA Central</div>
+    <div class="centerName" id="topbarSurveyName"></div>
     <div class="right">
       <span class="userlabel" id="topbarUser">—</span>
       <span class="badge">Admin</span>
@@ -279,10 +282,10 @@
         <section class="page" id="page-data">
           <div style="display:flex; gap:20px; align-items:flex-start; min-width:0;">
             <div id="dataSubnav" style="width:130px; flex:none;">
-              <button class="settings-subnav-item active" id="dataViewTableBtn">📋 Table</button>
-              <button class="settings-subnav-item" id="dataViewReportsBtn">📈 Reports</button>
-              <button class="settings-subnav-item" id="dataViewGalleryBtn">🖼️ Gallery</button>
-              <button class="settings-subnav-item" id="dataViewMapBtn">🗺️ Map</button>
+              <button class="settings-subnav-item active" id="dataViewTableBtn"><i data-lucide="table" class="lucide-icon"></i> Table</button>
+              <button class="settings-subnav-item" id="dataViewReportsBtn"><i data-lucide="bar-chart-3" class="lucide-icon"></i> Reports</button>
+              <button class="settings-subnav-item" id="dataViewGalleryBtn"><i data-lucide="image" class="lucide-icon"></i> Gallery</button>
+              <button class="settings-subnav-item" id="dataViewMapBtn"><i data-lucide="map" class="lucide-icon"></i> Map</button>
             </div>
             <div class="card" style="flex:1; min-width:0;">
 
@@ -291,7 +294,7 @@
                 <input type="text" id="filterSearch" placeholder="Search site, surveyor, respondent…">
                 <select id="filterProvince"><option value="">All provinces</option></select>
                 <div style="position:relative;">
-                  <button class="btn-ghost" id="hideFieldsBtn">👁 Hide Fields</button>
+                  <button class="btn-ghost" id="hideFieldsBtn"><i data-lucide="eye-off" class="lucide-icon"></i> Hide Fields</button>
                   <div id="hideFieldsPanel" style="display:none; position:absolute; top:38px; left:0; background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:10px 14px; box-shadow:0 6px 18px rgba(27,46,40,0.15); z-index:50; min-width:200px;"></div>
                 </div>
               </div>
@@ -302,16 +305,16 @@
                 </div>
                 <div class="actions">
                   <div style="position:relative;">
-                    <button class="btn-ghost" id="changeStatusBtn" disabled>🏷 Change Status</button>
+                    <button class="btn-ghost" id="changeStatusBtn" disabled><i data-lucide="tag" class="lucide-icon"></i> Change Status</button>
                     <div id="changeStatusPanel" style="display:none; position:absolute; top:38px; right:0; background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:6px; box-shadow:0 6px 18px rgba(27,46,40,0.15); z-index:50; min-width:150px;">
-                      <button class="quicklink" data-review="approved" style="border:none;">✅ Approved</button>
-                      <button class="quicklink" data-review="not_approved" style="border:none;">❌ Not Approved</button>
-                      <button class="quicklink" data-review="on_hold" style="border:none;">⏸ On-Hold</button>
-                      <button class="quicklink" data-review="not_reviewed" style="border:none;">↺ Not Reviewed</button>
+                      <button class="quicklink" data-review="approved" style="border:none;"><i data-lucide="check-circle" class="lucide-icon"></i> Approved</button>
+                      <button class="quicklink" data-review="not_approved" style="border:none;"><i data-lucide="x-circle" class="lucide-icon"></i> Not Approved</button>
+                      <button class="quicklink" data-review="on_hold" style="border:none;"><i data-lucide="pause-circle" class="lucide-icon"></i> On-Hold</button>
+                      <button class="quicklink" data-review="not_reviewed" style="border:none;"><i data-lucide="rotate-ccw" class="lucide-icon"></i> Not Reviewed</button>
                     </div>
                   </div>
-                  <button class="btn-ghost" id="editSelectedBtn" disabled>✏️ Edit</button>
-                  <button class="btn" id="deleteSelectedBtn" disabled style="background:none; color:var(--alert); border:1.5px solid var(--alert); font-weight:600; font-size:0.82rem; padding:8px 14px;">🗑 Delete</button>
+                  <button class="btn-ghost" id="editSelectedBtn" disabled><i data-lucide="pencil" class="lucide-icon"></i> Edit</button>
+                  <button class="btn" id="deleteSelectedBtn" disabled style="background:none; color:var(--alert); border:1.5px solid var(--alert); font-weight:600; font-size:0.82rem; padding:8px 14px;"><i data-lucide="trash-2" class="lucide-icon"></i> Delete</button>
                 </div>
                 <div class="actions">
                   <button class="btn btn-secondary" id="exportSelectedBtn">Export Selected (<span id="selCount">0</span>)</button>
@@ -375,8 +378,8 @@
         <section class="page" id="page-settings">
           <div style="display:flex; gap:20px; align-items:flex-start;">
             <div id="settingsSubnav" style="width:150px; flex:none;">
-              <button class="settings-subnav-item active" data-settingstab="general">⚙️ General</button>
-              <button class="settings-subnav-item" data-settingstab="activity">🕘 Activity</button>
+              <button class="settings-subnav-item active" data-settingstab="general"><i data-lucide="settings" class="lucide-icon"></i> General</button>
+              <button class="settings-subnav-item" data-settingstab="activity"><i data-lucide="clock" class="lucide-icon"></i> Activity</button>
             </div>
             <div style="flex:1; min-width:0;">
 
@@ -421,7 +424,7 @@
                         <option value="Logged in">Logged in</option>
                         <option value="Exported">Exported data</option>
                       </select>
-                      <button class="btn btn-secondary" id="activityExportBtn">⬇️ Export All Data</button>
+                      <button class="btn btn-secondary" id="activityExportBtn"><i data-lucide="download" class="lucide-icon"></i> Export All Data</button>
                     </div>
                   </div>
                   <div class="table-wrap">
@@ -449,9 +452,9 @@
       <div id="rightCol">
         <div class="card">
           <h3>Quick Links</h3>
-          <button class="quicklink" id="qlTable"><span>📋 View Table</span><span class="arrow">›</span></button>
-          <button class="quicklink" id="qlMap"><span>🗺️ View Map</span><span class="arrow">›</span></button>
-          <button class="quicklink" id="qlDownload"><span>⬇️ Download Data</span><span class="arrow">›</span></button>
+          <button class="quicklink" id="qlTable"><span><i data-lucide="table" class="lucide-icon"></i> View Table</span><span class="arrow">›</span></button>
+          <button class="quicklink" id="qlMap"><span><i data-lucide="map" class="lucide-icon"></i> View Map</span><span class="arrow">›</span></button>
+          <button class="quicklink" id="qlDownload"><span><i data-lucide="download" class="lucide-icon"></i> Download Data</span><span class="arrow">›</span></button>
         </div>
         <div class="card">
           <h3>Team Members</h3>
@@ -495,6 +498,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <script>
 const SUPABASE_URL = "https://spwdpzcuyrwjdhvluadu.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNwd2RwemN1eXJ3amRodmx1YWR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5OTQyOTYsImV4cCI6MjA5NjU3MDI5Nn0.xoI33qTtwT0SMxY_uJGQ0xSWE1o3Q0UgifguMyjvso8";
@@ -521,6 +525,9 @@ function toast(msg){
   clearTimeout(toast._h); toast._h = setTimeout(function(){ t.classList.remove('show'); }, 2600);
 }
 function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; }); }
+function refreshLucideIcons(){
+  if(typeof lucide !== 'undefined'){ lucide.createIcons(); }
+}
 
 /* ===== Auth ===== */
 function showLogin(msg){
@@ -538,6 +545,7 @@ function showApp(){
   updateTopbarSurveyName();
   loadAllData();
   logActivity('Logged in');
+  refreshLucideIcons();
 }
 document.getElementById('loginBtn').addEventListener('click', async function(){
   const email = document.getElementById('loginEmail').value.trim();
@@ -606,7 +614,7 @@ document.querySelectorAll('.survey-item').forEach(function(el){
 });
 function updateTopbarSurveyName(){
   const meta = SURVEY_META[selectedType];
-  document.getElementById('topbarSurveyName').textContent = meta ? (' · '+meta.title) : '';
+  document.getElementById('topbarSurveyName').textContent = meta ? meta.title : '';
 }
 
 /* ===== Quick links ===== */
@@ -949,7 +957,7 @@ function renderTable(){
       const cells = cols.map(function(c){ return '<td>'+(c.html ? c.get(r) : escapeHtml(c.get(r)))+'</td>'; }).join('');
       tr.innerHTML = '<td><input type="checkbox" data-rowid="'+r.id+'" '+(selectedIds[r.id]?'checked':'')+'></td>'+
         cells +
-        '<td><button class="btn-ghost" data-viewrow="'+r.id+'" style="padding:4px 9px;">👁</button></td>';
+        '<td><button class="btn-ghost" data-viewrow="'+r.id+'" style="padding:4px 9px;"><i data-lucide="eye" class="lucide-icon"></i></button></td>';
       tbody.appendChild(tr);
     });
     tbody.querySelectorAll('[data-rowid]').forEach(function(el){
@@ -970,6 +978,7 @@ function renderTable(){
   document.getElementById('tablePrevBtn').disabled = tableCurrentPage === 0;
   document.getElementById('tableNextBtn').disabled = tableCurrentPage >= totalPages - 1;
   updateSelCount();
+  refreshLucideIcons();
 }
 document.getElementById('tableRowsPerPage').addEventListener('change', function(){ tableCurrentPage = 0; renderTable(); });
 document.getElementById('tablePrevBtn').addEventListener('click', function(){ if(tableCurrentPage>0){ tableCurrentPage--; renderTable(); } });
