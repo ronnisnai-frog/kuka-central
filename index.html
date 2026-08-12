@@ -827,12 +827,14 @@ document.getElementById('accountSettingsBtn').addEventListener('click', function
   document.getElementById('subtabs').style.display = 'none';
   document.getElementById('layout').style.display = 'none';
   document.getElementById('accountSettingsView').style.display = 'block';
+  document.getElementById('topbarSurveyName').textContent = '';
   loadProfile();
 });
 document.getElementById('accountSettingsBack').addEventListener('click', function(){
   document.getElementById('accountSettingsView').style.display = 'none';
   document.getElementById('subtabs').style.display = 'flex';
   document.getElementById('layout').style.display = 'flex';
+  updateTopbarSurveyName();
 });
 document.querySelectorAll('#accountSettingsView [data-acctab]').forEach(function(el){
   el.addEventListener('click', function(){
