@@ -138,6 +138,10 @@
   .table-wrap{ overflow-x:auto; max-height:520px; overflow-y:auto; border:1px solid var(--line); border-radius:8px; }
   .badge{ font-size:0.68rem; font-weight:700; padding:3px 9px; border-radius:10px; text-transform:uppercase; white-space:nowrap; }
   .badge.pending{ background:#F5DFC8; color:var(--shell-dim); }
+  .badge.approved{ background:#DCEAE0; color:var(--mangrove-mid); }
+  .badge.not_approved{ background:#F7DEDE; color:var(--alert); }
+  .badge.on_hold{ background:#FDF0DE; color:var(--shell-dim); }
+  .badge.not_reviewed{ background:var(--sand-dim); color:var(--tide); }
   .badge.completed{ background:#DCEAE0; color:var(--mangrove-mid); }
 
   .toolbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
@@ -284,11 +288,28 @@
               <div class="filters">
                 <input type="text" id="filterSearch" placeholder="Search site, surveyor, respondent…">
                 <select id="filterProvince"><option value="">All provinces</option></select>
+                <div style="position:relative;">
+                  <button class="btn-ghost" id="hideFieldsBtn">👁 Hide Fields</button>
+                  <div id="hideFieldsPanel" style="display:none; position:absolute; top:38px; left:0; background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:10px 14px; box-shadow:0 6px 18px rgba(27,46,40,0.15); z-index:50; min-width:200px;"></div>
+                </div>
               </div>
               <div class="toolbar">
                 <div class="actions">
                   <button class="btn-ghost" id="selectAllBtn">Select All (visible)</button>
                   <button class="btn-ghost" id="selectNoneBtn">Select None</button>
+                </div>
+                <div class="actions">
+                  <div style="position:relative;">
+                    <button class="btn-ghost" id="changeStatusBtn" disabled>🏷 Change Status</button>
+                    <div id="changeStatusPanel" style="display:none; position:absolute; top:38px; right:0; background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:6px; box-shadow:0 6px 18px rgba(27,46,40,0.15); z-index:50; min-width:150px;">
+                      <button class="quicklink" data-review="approved" style="border:none;">✅ Approved</button>
+                      <button class="quicklink" data-review="not_approved" style="border:none;">❌ Not Approved</button>
+                      <button class="quicklink" data-review="on_hold" style="border:none;">⏸ On-Hold</button>
+                      <button class="quicklink" data-review="not_reviewed" style="border:none;">↺ Not Reviewed</button>
+                    </div>
+                  </div>
+                  <button class="btn-ghost" id="editSelectedBtn" disabled>✏️ Edit</button>
+                  <button class="btn" id="deleteSelectedBtn" disabled style="background:none; color:var(--alert); border:1.5px solid var(--alert); font-weight:600; font-size:0.82rem; padding:8px 14px;">🗑 Delete</button>
                 </div>
                 <div class="actions">
                   <button class="btn btn-secondary" id="exportSelectedBtn">Export Selected (<span id="selCount">0</span>)</button>
@@ -451,6 +472,18 @@
       <button id="rowDetailClose" style="background:none; border:none; font-size:1.3rem; cursor:pointer; color:var(--tide);">✕</button>
     </div>
     <div id="rowDetailContent"></div>
+  </div>
+</div>
+
+<div id="editModal" style="position:fixed; inset:0; background:rgba(27,46,40,0.5); z-index:400; display:none; align-items:center; justify-content:center; padding:24px;">
+  <div style="background:var(--paper); border-radius:12px; padding:24px; max-width:480px; width:100%; max-height:80vh; overflow-y:auto;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <h3 style="margin:0;">Edit Survey</h3>
+      <button id="editModalClose" style="background:none; border:none; font-size:1.3rem; cursor:pointer; color:var(--tide);">✕</button>
+    </div>
+    <p class="sub" style="margin-bottom:14px;">Only top-level fields can be edited here — individual crab/quadrat entries need to be corrected in KUKA Collect.</p>
+    <div id="editModalFields"></div>
+    <button class="btn btn-primary btn-block" id="editModalSave" style="margin-top:14px; width:100%;">Save Changes</button>
   </div>
 </div>
 
@@ -814,8 +847,14 @@ function allBaitCrabs(rec){
 }
 function statusLabel(r){ return r.synced === false ? 'Pending' : 'Synced'; }
 
+function reviewBadgeHtml(r){
+  const status = r.review_status || 'not_reviewed';
+  const labels = { approved:'Approved', not_approved:'Not Approved', on_hold:'On-Hold', not_reviewed:'Not Reviewed' };
+  return '<span class="badge '+status+'">'+(labels[status]||'Not Reviewed')+'</span>';
+}
 const COLUMNS_BY_TYPE = {
   mudcrab: [
+    { label:'Review', html:true, get:reviewBadgeHtml },
     { label:'Start Time', get:function(r){ return r.start_time || '—'; } },
     { label:'Date', get:function(r){ return r.survey_date || '—'; } },
     { label:'Surveyor', get:function(r){ return r.surveyor1 || '—'; } },
@@ -831,6 +870,7 @@ const COLUMNS_BY_TYPE = {
     { label:'Status', get:statusLabel }
   ],
   socioeconomic: [
+    { label:'Review', html:true, get:reviewBadgeHtml },
     { label:'Date', get:function(r){ return r.survey_date || '—'; } },
     { label:'Surveyor', get:function(r){ return r.surveyor1 || '—'; } },
     { label:'Respondent', get:function(r){ return getLabel(r); } },
@@ -841,6 +881,7 @@ const COLUMNS_BY_TYPE = {
     { label:'Status', get:statusLabel }
   ],
   biological: [
+    { label:'Review', html:true, get:reviewBadgeHtml },
     { label:'Start Time', get:function(r){ return r.start_time || '—'; } },
     { label:'Date', get:function(r){ return r.survey_date || '—'; } },
     { label:'Surveyor 1', get:function(r){ return r.surveyor1 || '—'; } },
@@ -876,8 +917,10 @@ function getFilteredRows(){
 
 let tableCurrentPage = 0;
 
+let hiddenColumnsByType = { mudcrab:{}, socioeconomic:{}, biological:{} };
+
 function renderTable(){
-  const cols = COLUMNS_BY_TYPE[selectedType];
+  const cols = COLUMNS_BY_TYPE[selectedType].filter(function(c){ return !hiddenColumnsByType[selectedType][c.label]; });
   const headRow = document.getElementById('tableHeadRow');
   headRow.innerHTML = '<th></th>' + cols.map(function(c){ return '<th>'+escapeHtml(c.label)+'</th>'; }).join('') + '<th></th>';
 
@@ -894,7 +937,7 @@ function renderTable(){
   } else {
     rows.forEach(function(r){
       const tr = document.createElement('tr');
-      const cells = cols.map(function(c){ return '<td>'+escapeHtml(c.get(r))+'</td>'; }).join('');
+      const cells = cols.map(function(c){ return '<td>'+(c.html ? c.get(r) : escapeHtml(c.get(r)))+'</td>'; }).join('');
       tr.innerHTML = '<td><input type="checkbox" data-rowid="'+r.id+'" '+(selectedIds[r.id]?'checked':'')+'></td>'+
         cells +
         '<td><button class="btn-ghost" data-viewrow="'+r.id+'" style="padding:4px 9px;">👁</button></td>';
@@ -928,7 +971,7 @@ function showRowDetail(rec){
   let html = '<div class="info-grid">';
   html += '<div class="info-item"><div class="k">Survey ID</div><div class="v">'+escapeHtml(rec.id)+'</div></div>';
   cols.forEach(function(c){
-    html += '<div class="info-item"><div class="k">'+escapeHtml(c.label)+'</div><div class="v">'+escapeHtml(c.get(rec))+'</div></div>';
+    html += '<div class="info-item"><div class="k">'+escapeHtml(c.label)+'</div><div class="v">'+(c.html ? c.get(rec) : escapeHtml(c.get(rec)))+'</div></div>';
   });
   html += '</div>';
   const comments = rec.comments || (rec.data && rec.data.q33_actions);
@@ -940,7 +983,13 @@ document.getElementById('rowDetailClose').addEventListener('click', function(){ 
 document.getElementById('rowDetailModal').addEventListener('click', function(e){ if(e.target.id === 'rowDetailModal') document.getElementById('rowDetailModal').style.display = 'none'; });
 
 
-function updateSelCount(){ document.getElementById('selCount').textContent = Object.keys(selectedIds).length; }
+function updateSelCount(){
+  const count = Object.keys(selectedIds).length;
+  document.getElementById('selCount').textContent = count;
+  document.getElementById('changeStatusBtn').disabled = count === 0;
+  document.getElementById('editSelectedBtn').disabled = count !== 1;
+  document.getElementById('deleteSelectedBtn').disabled = count === 0;
+}
 document.getElementById('filterSearch').addEventListener('input', function(){ tableCurrentPage = 0; renderTable(); });
 document.getElementById('filterProvince').addEventListener('change', function(){ tableCurrentPage = 0; renderTable(); });
 document.getElementById('selectAllBtn').addEventListener('click', function(){
@@ -950,6 +999,128 @@ document.getElementById('selectAllBtn').addEventListener('click', function(){
 document.getElementById('selectNoneBtn').addEventListener('click', function(){
   selectedIds = {};
   renderTable();
+});
+
+/* ===== Hide Fields ===== */
+document.getElementById('hideFieldsBtn').addEventListener('click', function(e){
+  e.stopPropagation();
+  const panel = document.getElementById('hideFieldsPanel');
+  if(panel.style.display === 'block'){ panel.style.display = 'none'; return; }
+  panel.innerHTML = COLUMNS_BY_TYPE[selectedType].map(function(c){
+    const hidden = !!hiddenColumnsByType[selectedType][c.label];
+    return '<label style="display:flex; align-items:center; gap:8px; padding:6px 0; font-size:0.85rem; cursor:pointer;">'+
+      '<input type="checkbox" data-hidecol="'+escapeHtml(c.label)+'" '+(hidden?'':'checked')+'> '+escapeHtml(c.label)+'</label>';
+  }).join('');
+  panel.querySelectorAll('[data-hidecol]').forEach(function(el){
+    el.addEventListener('change', function(e){
+      hiddenColumnsByType[selectedType][e.target.dataset.hidecol] = !e.target.checked;
+      renderTable();
+    });
+  });
+  panel.style.display = 'block';
+});
+document.addEventListener('click', function(e){
+  const panel = document.getElementById('hideFieldsPanel');
+  if(panel.style.display === 'block' && !panel.contains(e.target) && e.target.id !== 'hideFieldsBtn'){ panel.style.display = 'none'; }
+});
+
+/* ===== Change Status (bulk) ===== */
+document.getElementById('changeStatusBtn').addEventListener('click', function(e){
+  e.stopPropagation();
+  const panel = document.getElementById('changeStatusPanel');
+  panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+});
+document.addEventListener('click', function(e){
+  const panel = document.getElementById('changeStatusPanel');
+  if(panel.style.display === 'block' && !panel.contains(e.target) && e.target.id !== 'changeStatusBtn'){ panel.style.display = 'none'; }
+});
+document.querySelectorAll('#changeStatusPanel [data-review]').forEach(function(el){
+  el.addEventListener('click', async function(){
+    const status = el.dataset.review;
+    const ids = Object.keys(selectedIds);
+    if(ids.length === 0) return;
+    document.getElementById('changeStatusPanel').style.display = 'none';
+    try{
+      const result = await supabaseClient.from('surveys').update({ review_status: status }).in('id', ids);
+      if(result.error){ toast('Could not update status: '+result.error.message); return; }
+      allRows.forEach(function(r){ if(selectedIds[r.id]) r.review_status = status; });
+      renderTable();
+      toast('Updated status for '+ids.length+' survey'+(ids.length===1?'':'s'));
+      logActivity('Changed review status', SURVEY_META[selectedType].title+' — '+ids.length+' record(s) → '+status);
+    }catch(err){
+      toast('Could not update status. Check your connection.');
+    }
+  });
+});
+
+/* ===== Edit (single row, top-level fields only) ===== */
+const EDIT_FIELDS = [
+  { key:'surveyor1', label:'Surveyor' },
+  { key:'province', label:'Province' },
+  { key:'llg', label:'LLG' },
+  { key:'sampling_site', label:'Sampling Site / Village' },
+  { key:'tide_condition', label:'Tide Condition' },
+  { key:'comments', label:'Comments' }
+];
+let editingRecordId = null;
+document.getElementById('editSelectedBtn').addEventListener('click', function(){
+  const ids = Object.keys(selectedIds);
+  if(ids.length !== 1){ toast('Select exactly one survey to edit.'); return; }
+  const rec = allRows.find(function(r){ return r.id === ids[0]; });
+  if(!rec) return;
+  editingRecordId = rec.id;
+  const container = document.getElementById('editModalFields');
+  container.innerHTML = EDIT_FIELDS.map(function(f){
+    return '<label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin:12px 0 6px;">'+escapeHtml(f.label)+'</label>'+
+      '<input type="text" data-editfield="'+f.key+'" value="'+escapeHtml(rec[f.key]||'')+'" style="width:100%; padding:9px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">';
+  }).join('');
+  document.getElementById('editModal').style.display = 'flex';
+});
+document.getElementById('editModalClose').addEventListener('click', function(){ document.getElementById('editModal').style.display = 'none'; });
+document.getElementById('editModal').addEventListener('click', function(e){ if(e.target.id === 'editModal') document.getElementById('editModal').style.display = 'none'; });
+document.getElementById('editModalSave').addEventListener('click', async function(){
+  if(!editingRecordId) return;
+  const btn = document.getElementById('editModalSave');
+  const updates = {};
+  document.querySelectorAll('#editModalFields [data-editfield]').forEach(function(el){ updates[el.dataset.editfield] = el.value.trim(); });
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try{
+    const result = await supabaseClient.from('surveys').update(updates).eq('id', editingRecordId);
+    if(result.error){ toast('Could not save: '+result.error.message); return; }
+    const rec = allRows.find(function(r){ return r.id === editingRecordId; });
+    if(rec) Object.assign(rec, updates);
+    renderTable();
+    renderProvinceFilter();
+    document.getElementById('editModal').style.display = 'none';
+    toast('Survey updated');
+    logActivity('Edited survey', SURVEY_META[selectedType].title+' — '+editingRecordId.slice(0,10));
+  }catch(err){
+    toast('Could not save changes. Check your connection.');
+  }finally{
+    btn.disabled = false; btn.textContent = 'Save Changes';
+    editingRecordId = null;
+  }
+});
+
+/* ===== Delete Selected (row-level) ===== */
+document.getElementById('deleteSelectedBtn').addEventListener('click', async function(){
+  const ids = Object.keys(selectedIds);
+  if(ids.length === 0) return;
+  if(!confirm('Permanently delete '+ids.length+' selected survey'+(ids.length===1?'':'s')+'? This cannot be undone.')) return;
+  const btn = document.getElementById('deleteSelectedBtn');
+  btn.disabled = true;
+  try{
+    const result = await supabaseClient.from('surveys').delete().in('id', ids);
+    if(result.error){ toast('Could not delete: '+result.error.message); return; }
+    toast('Deleted '+ids.length+' survey'+(ids.length===1?'':'s'));
+    logActivity('Deleted selected surveys', SURVEY_META[selectedType].title+' — '+ids.length+' record(s)');
+    selectedIds = {};
+    await loadAllData();
+  }catch(err){
+    toast('Could not delete. Check your connection.');
+  }finally{
+    btn.disabled = false;
+  }
 });
 
 /* ===== Export ===== */
