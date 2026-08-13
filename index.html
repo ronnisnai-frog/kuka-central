@@ -10,17 +10,20 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
   :root{
-    --mangrove-dark:#1B2E28;
-    --mangrove-mid:#2D4A3E;
-    --sand:#F5F1E8;
-    --sand-dim:#EAE3D3;
-    --shell:#C4622D;
-    --shell-dim:#a3521f;
-    --tide:#4A6670;
-    --alert:#B23A3A;
-    --ink:#20261F;
+    --mangrove-dark:#004B49;
+    --mangrove-mid:#0A5E5B;
+    --sand:#F2F7FA;
+    --sand-dim:#E3EEF3;
+    --shell:#60A5FA;
+    --shell-dim:#3B82F6;
+    --tide:#5B7A88;
+    --alert:#DC2626;
+    --ink:#16232A;
     --paper:#FFFFFF;
-    --line:#D8D0BC;
+    --line:#DCE8EE;
+    --aqua:#10B981;
+    --aqua-dim:#0C9268;
+    --aqua-bg:#DEF7EC;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -36,10 +39,18 @@
 
   /* ===== Login screen ===== */
   #loginScreen{
-    position:fixed; inset:0; background:var(--mangrove-dark); display:flex;
+    position:fixed; inset:0; display:flex;
     align-items:center; justify-content:center; z-index:200;
+    background: linear-gradient(135deg, var(--mangrove-dark) 0%, var(--mangrove-mid) 45%, var(--shell) 100%);
   }
-  #loginScreen .card{ width:100%; max-width:380px; background:var(--paper); border-radius:14px; padding:32px 28px; }
+  #loginScreen::before{
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background-image:url('./pattern-bg.png');
+    background-repeat:repeat; background-size:220px 220px;
+    opacity:0.10; mix-blend-mode:overlay;
+  }
+  #loginScreen .card{ position:relative; z-index:2; width:100%; max-width:380px; background:var(--paper); border-radius:14px; padding:32px 28px;
+    box-shadow:0 20px 60px rgba(0,20,20,0.35); }
   #loginScreen h1{ text-align:center; color:var(--mangrove-dark); font-size:1.6rem; margin-bottom:2px; }
   #loginScreen .brand-logo{ filter:none; }
   #loginScreen p.sub{ text-align:center; color:var(--tide); font-size:0.85rem; margin-bottom:22px; }
@@ -93,7 +104,7 @@
   .info-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px 24px; }
   .info-item .k{ font-size:0.68rem; text-transform:uppercase; letter-spacing:0.3px; color:var(--tide); font-weight:700; margin-bottom:3px; }
   .info-item .v{ font-size:0.92rem; font-weight:600; }
-  .status-pill{ display:inline-block; background:#DCEAE0; color:var(--mangrove-mid); font-size:0.72rem; font-weight:700; padding:3px 10px; border-radius:10px; }
+  .status-pill{ display:inline-block; background:var(--aqua-bg); color:var(--aqua-dim); font-size:0.72rem; font-weight:700; padding:3px 10px; border-radius:10px; }
 
   .period-tabs{ display:flex; gap:8px; margin-bottom:16px; }
   .period-tabs button{ padding:7px 13px; font-size:0.76rem; font-weight:700; border-radius:16px; border:1.5px solid var(--line); background:none; color:var(--tide); cursor:pointer; font-family:inherit; }
@@ -148,11 +159,11 @@
   .table-wrap{ overflow-x:auto; max-height:520px; overflow-y:auto; border:1px solid var(--line); border-radius:8px; }
   .badge{ font-size:0.68rem; font-weight:700; padding:3px 9px; border-radius:10px; text-transform:uppercase; white-space:nowrap; }
   .badge.pending{ background:#F5DFC8; color:var(--shell-dim); }
-  .badge.approved{ background:#DCEAE0; color:var(--mangrove-mid); }
+  .badge.approved{ background:var(--aqua-bg); color:var(--aqua-dim); }
   .badge.not_approved{ background:#F7DEDE; color:var(--alert); }
   .badge.on_hold{ background:#FDF0DE; color:var(--shell-dim); }
   .badge.not_reviewed{ background:var(--sand-dim); color:var(--tide); }
-  .badge.completed{ background:#DCEAE0; color:var(--mangrove-mid); }
+  .badge.completed{ background:var(--aqua-bg); color:var(--aqua-dim); }
 
   .toolbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
   .toolbar .actions{ display:flex; gap:10px; flex-wrap:wrap; }
@@ -383,9 +394,9 @@
             <div id="dataMapView" style="display:none;">
               <p class="sub" style="margin-bottom:8px;">GPS-tagged submissions for this survey type.</p>
               <div style="display:flex; gap:16px; margin-bottom:12px; font-size:0.78rem; color:var(--tide);">
-                <span><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#C4622D; margin-right:5px;"></span>Mud Crab</span>
+                <span><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#60A5FA; margin-right:5px;"></span>Mud Crab</span>
                 <span><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#5B4A8A; margin-right:5px;"></span>Socio-economic</span>
-                <span><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#2D4A3E; margin-right:5px;"></span>Biological</span>
+                <span><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#004B49; margin-right:5px;"></span>Biological</span>
               </div>
               <div id="mapView"></div>
             </div>
@@ -1810,7 +1821,7 @@ document.getElementById('activityExportBtn').addEventListener('click', function(
 });
 
 /* ===== Map ===== */
-const TYPE_COLORS = { mudcrab:'#C4622D', socioeconomic:'#5B4A8A', biological:'#2D4A3E' };
+const TYPE_COLORS = { mudcrab:'#60A5FA', socioeconomic:'#5B4A8A', biological:'#004B49' };
 function coloredMarkerIcon(color){
   return L.divIcon({
     className: '',
