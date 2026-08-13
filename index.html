@@ -24,6 +24,9 @@
     --aqua:#10B981;
     --aqua-dim:#0C9268;
     --aqua-bg:#DEF7EC;
+    --orange:#C4622D;
+    --orange-dim:#a3521f;
+    --orange-bg:#F5DFC8;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -158,10 +161,10 @@
   tbody tr:hover{ background:var(--sand-dim); }
   .table-wrap{ overflow-x:auto; max-height:520px; overflow-y:auto; border:1px solid var(--line); border-radius:8px; }
   .badge{ font-size:0.68rem; font-weight:700; padding:3px 9px; border-radius:10px; text-transform:uppercase; white-space:nowrap; }
-  .badge.pending{ background:#F5DFC8; color:var(--shell-dim); }
+  .badge.pending{ background:var(--orange-bg); color:var(--orange-dim); }
   .badge.approved{ background:var(--aqua-bg); color:var(--aqua-dim); }
   .badge.not_approved{ background:#F7DEDE; color:var(--alert); }
-  .badge.on_hold{ background:#FDF0DE; color:var(--shell-dim); }
+  .badge.on_hold{ background:var(--orange-bg); color:var(--orange-dim); }
   .badge.not_reviewed{ background:var(--sand-dim); color:var(--tide); }
   .badge.completed{ background:var(--aqua-bg); color:var(--aqua-dim); }
 
@@ -210,14 +213,14 @@
 <div id="loginScreen">
   <div class="card">
     <h1><img src="./mudcrab-icon.png" class="brand-logo" alt=""> KUKA Central</h1>
-    <p class="sub">Admin data dashboard — Papua New Guinea</p>
+    <p class="sub">Fisheries Data Server — Papua New Guinea</p>
     <div id="loginErr"></div>
     <label>Email</label>
     <input type="text" id="loginEmail" autocomplete="username">
     <label>Password</label>
     <input type="text" id="loginPassword" autocomplete="current-password" style="-webkit-text-security:disc; text-security:disc;">
     <button class="btn btn-primary" id="loginBtn" style="width:100%; margin-top:20px;">Log In</button>
-    <p class="sub" style="margin-top:16px;">Use your existing KUKA Collect admin account.</p>
+    <p class="sub" style="margin-top:16px;">Login using your KUKA Account Credentials.</p>
   </div>
 </div>
 
