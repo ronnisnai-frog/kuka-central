@@ -297,7 +297,6 @@
             <div class="info-grid">
               <div class="info-item"><div class="k">Status</div><div class="v"><span class="status-pill">● Live</span></div></div>
               <div class="info-item"><div class="k">Questions</div><div class="v" id="sumQuestions">—</div></div>
-              <div class="info-item"><div class="k">App Version</div><div class="v" id="sumVersion">—</div></div>
               <div class="info-item"><div class="k">Last Updated</div><div class="v" id="sumUpdated">—</div></div>
               <div class="info-item"><div class="k">Region</div><div class="v">Papua New Guinea</div></div>
               <div class="info-item"><div class="k">Category</div><div class="v">Fisheries</div></div>
@@ -808,7 +807,6 @@ const SURVEY_META = {
   socioeconomic: { title:'Coconut Crab — Socio-economic', desc:'Livelihood, harvesting, market & local knowledge survey', questions:42, updated:'Jul 30, 2026' },
   biological: { title:'Coconut Crab — Biological', desc:'Bait stations & coconut crab measurements', questions:24, updated:'Jul 30, 2026' }
 };
-const APP_VERSION_DISPLAY = "v4.2.0";
 
 let currentUser = null;
 let allRows = [];
@@ -1352,7 +1350,6 @@ function renderSummary(){
   document.getElementById('sumTitle').textContent = meta.title;
   document.getElementById('sumDesc').textContent = meta.desc;
   document.getElementById('sumQuestions').textContent = meta.questions;
-  document.getElementById('sumVersion').textContent = APP_VERSION_DISPLAY;
   document.getElementById('sumUpdated').textContent = meta.updated;
   renderSummaryStats();
 }
