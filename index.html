@@ -239,6 +239,8 @@
           <div style="border-top:1px solid var(--sand-dim);"></div>
           <button class="dropdown-item" id="privacyPolicyBtn"><i data-lucide="shield-check" class="lucide-icon"></i> Data &amp; Privacy Policy</button>
           <div style="border-top:1px solid var(--sand-dim);"></div>
+          <button class="dropdown-item" id="helpBtn"><i data-lucide="help-circle" class="lucide-icon"></i> Help</button>
+          <div style="border-top:1px solid var(--sand-dim);"></div>
           <div style="padding:10px 16px 4px;">
             <label style="display:flex; align-items:center; gap:8px; font-size:0.86rem; font-weight:600; cursor:pointer;">
               <i data-lucide="languages" class="lucide-icon"></i> Language
@@ -642,6 +644,69 @@
   </div>
 </div>
 
+<div id="helpView" style="display:none; padding:26px 30px;">
+  <button id="helpBack" class="btn-ghost" style="margin-bottom:18px;"><i data-lucide="arrow-left" class="lucide-icon"></i> Back to Dashboard</button>
+  <div style="max-width:640px;">
+    <h2 style="margin-bottom:4px;">Help &amp; Guide</h2>
+    <p class="sub" style="margin-bottom:20px;">An overview of what each part of KUKA Central does.</p>
+
+    <div class="card">
+      <h3>Survey List</h3>
+      <p class="sub">The left sidebar lists the three survey types — Mud Crab, Coconut Crab Socio-economic, and Coconut Crab Biological. Selecting one scopes everything else on screen — Summary, Data, and Settings — to just that survey type.</p>
+    </div>
+
+    <div class="card">
+      <h3>Summary Tab</h3>
+      <p class="sub">Shows the selected survey's description, question count, region, and category, plus a Submissions card with counts over 7/31/90/365 days and a running total.</p>
+    </div>
+
+    <div class="card">
+      <h3>Users Tab</h3>
+      <p class="sub">Lists everyone who has requested or been granted access to KUKA Collect, with their approval status and request date.</p>
+    </div>
+
+    <div class="card">
+      <h3>Data → Table</h3>
+      <p class="sub">A full spreadsheet-style view of every submission, one row per survey. Search and filter by province, hide columns you don't need, and select rows to bulk Change Status, Edit top-level fields, Delete, or Export to Excel.</p>
+    </div>
+
+    <div class="card">
+      <h3>Data → Reports</h3>
+      <p class="sub">An automatic frequency breakdown for every field — how many submissions answered it, and the most common values — useful for a quick sense of your data without opening Excel.</p>
+    </div>
+
+    <div class="card">
+      <h3>Data → Gallery</h3>
+      <p class="sub">Every specimen photo captured in the field (Mud Crab and Biological surveys only), labeled with survey ID and date, sortable and filterable by date range. Click any photo to view it full-size.</p>
+    </div>
+
+    <div class="card">
+      <h3>Data → Map</h3>
+      <p class="sub">Plots every GPS-tagged submission for the selected survey type. Markers are color-coded by survey type — orange for Mud Crab, purple for Socio-economic, dark teal for Biological.</p>
+    </div>
+
+    <div class="card">
+      <h3>Change Status</h3>
+      <p class="sub">A review workflow separate from sync status — mark submissions as Approved, Not Approved, On-Hold, or Not Reviewed to track your own data quality checks.</p>
+    </div>
+
+    <div class="card">
+      <h3>Settings → General</h3>
+      <p class="sub">Edit the description shown on a survey's Summary tab. The Danger Zone here permanently deletes all data for the currently selected survey type — export a backup first if there's any chance you'll need it.</p>
+    </div>
+
+    <div class="card">
+      <h3>Settings → Activity</h3>
+      <p class="sub">A real audit log of admin actions — logins, exports, deletions, and description changes — with filtering and pagination.</p>
+    </div>
+
+    <div class="card">
+      <h3>Account Settings</h3>
+      <p class="sub">Update your profile details (name, organization, etc.) under Profile, or your password, email, and login history under Security, including the option to log out of every device at once.</p>
+    </div>
+  </div>
+</div>
+
 <div id="lightbox">
   <button class="lbClose" id="lightboxClose">✕</button>
   <img id="lightboxImg" src="" alt="">
@@ -846,6 +911,21 @@ document.getElementById('accountSettingsBtn').addEventListener('click', function
 });
 document.getElementById('accountSettingsBack').addEventListener('click', function(){
   document.getElementById('accountSettingsView').style.display = 'none';
+  document.getElementById('subtabs').style.display = 'flex';
+  document.getElementById('layout').style.display = 'flex';
+  updateTopbarSurveyName();
+});
+
+/* ===== Help ===== */
+document.getElementById('helpBtn').addEventListener('click', function(){
+  document.getElementById('accountMenu').style.display = 'none';
+  document.getElementById('subtabs').style.display = 'none';
+  document.getElementById('layout').style.display = 'none';
+  document.getElementById('helpView').style.display = 'block';
+  document.getElementById('topbarSurveyName').textContent = '';
+});
+document.getElementById('helpBack').addEventListener('click', function(){
+  document.getElementById('helpView').style.display = 'none';
   document.getElementById('subtabs').style.display = 'flex';
   document.getElementById('layout').style.display = 'flex';
   updateTopbarSurveyName();
