@@ -197,6 +197,11 @@
     font-size:0.85rem; font-weight:600; z-index:300; opacity:0; transition:opacity 0.25s ease; pointer-events:none; }
   .toast.show{ opacity:1; }
 
+  #fixedHelpBtn{ position:fixed; bottom:16px; left:16px; width:34px; height:34px; border-radius:50%; background:var(--paper);
+    border:1.5px solid var(--line); color:var(--tide); display:flex; align-items:center; justify-content:center; cursor:pointer;
+    box-shadow:0 2px 8px rgba(27,46,40,0.15); z-index:150; }
+  #fixedHelpBtn:hover{ background:var(--sand-dim); color:var(--mangrove-dark); }
+
   @media (max-width:900px){
     #main{ flex-direction:column; }
     #rightCol{ width:100%; }
@@ -784,6 +789,8 @@
   </div>
 </div>
 
+<button id="fixedHelpBtn" title="Help"><i data-lucide="help-circle" class="lucide-icon"></i></button>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -917,13 +924,15 @@ document.getElementById('accountSettingsBack').addEventListener('click', functio
 });
 
 /* ===== Help ===== */
-document.getElementById('helpBtn').addEventListener('click', function(){
+function openHelp(){
   document.getElementById('accountMenu').style.display = 'none';
   document.getElementById('subtabs').style.display = 'none';
   document.getElementById('layout').style.display = 'none';
   document.getElementById('helpView').style.display = 'block';
   document.getElementById('topbarSurveyName').textContent = '';
-});
+}
+document.getElementById('helpBtn').addEventListener('click', openHelp);
+document.getElementById('fixedHelpBtn').addEventListener('click', openHelp);
 document.getElementById('helpBack').addEventListener('click', function(){
   document.getElementById('helpView').style.display = 'none';
   document.getElementById('subtabs').style.display = 'flex';
