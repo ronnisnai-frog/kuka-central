@@ -1766,17 +1766,18 @@ function buildFullWorkbookForType(type, rows){
   const wb = XLSX.utils.book_new();
 
   if(type === 'mudcrab'){
-    const headers = ['Survey ID','Start Time','Date','Surveyor','Province','LLG','Sampling Site','Tide Condition','Comments','Lat','Lon','GPS Accuracy (m)','End Time',
-      'Quadrat #','Empty Burrows','Crabs Found','Crab #','Species','Sex','Berried','Molted','Carapace Width','Weight','Gear Used','Effort (min)','Has Photo'];
+    const headers = ['Survey ID','Start Time','Date','Surveyor','Province','LLG','Sampling Site','Tide Condition',
+      'Quadrat #','Empty Burrows','Crabs Found','Crab #','Species','Sex','Berried','Molted','Carapace Width','Weight','Gear Used','Effort (min)','Has Photo',
+      'Comments','Lat','Lon','GPS Accuracy (m)','End Time'];
     const aoa = [headers];
     rows.forEach(function(rec){
-      const base = [rec.id, rec.start_time, rec.survey_date, rec.surveyor1, rec.province, rec.llg, rec.sampling_site, rec.tide_condition, rec.comments,
-        rec.gps?rec.gps.lat:'', rec.gps?rec.gps.lon:'', rec.gps?rec.gps.accuracy:'', rec.end_time];
+      const baseStart = [rec.id, rec.start_time, rec.survey_date, rec.surveyor1, rec.province, rec.llg, rec.sampling_site, rec.tide_condition];
+      const baseEnd = [rec.comments, rec.gps?rec.gps.lat:'', rec.gps?rec.gps.lon:'', rec.gps?rec.gps.accuracy:'', rec.end_time];
       const quadrats = rec.quadrats || [];
-      if(quadrats.length === 0){ aoa.push(base.concat(['','','','','','','','','','','','',''])); }
+      if(quadrats.length === 0){ aoa.push(baseStart.concat(['','','','','','','','','','','','',''], baseEnd)); }
       else{ quadrats.forEach(function(q, qi){
-        if(!q.crabs || q.crabs.length===0){ aoa.push(base.concat([qi+1, q.emptyBurrows, q.crabsFound,'','','','','','','','','',''])); }
-        else{ q.crabs.forEach(function(c,ci){ aoa.push(base.concat([qi+1, q.emptyBurrows, q.crabsFound, ci+1, c.species, c.sex, c.berried, c.molted, c.carapaceWidth, c.weight, c.gearUsed, c.effort, c.photo?'Yes':'No'])); }); }
+        if(!q.crabs || q.crabs.length===0){ aoa.push(baseStart.concat([qi+1, q.emptyBurrows, q.crabsFound,'','','','','','','','','',''], baseEnd)); }
+        else{ q.crabs.forEach(function(c,ci){ aoa.push(baseStart.concat([qi+1, q.emptyBurrows, q.crabsFound, ci+1, c.species, c.sex, c.berried, c.molted, c.carapaceWidth, c.weight, c.gearUsed, c.effort, c.photo?'Yes':'No'], baseEnd)); }); }
       }); }
     });
     const ws = XLSX.utils.aoa_to_sheet(aoa);
@@ -1811,20 +1812,21 @@ function buildFullWorkbookForType(type, rows){
   }
 
   if(type === 'biological'){
-    const headers = ['Survey ID','Start Time','Date','Surveyor 1','Surveyor 2','Province','LLG','Sampling Site','Comments','Lat','Lon','GPS Accuracy (m)','End Time',
-      'Bait #','Crabs Found','Weather','Crab #','Cephalo Thoracic Length','Thoracic Length','Carapace Width','Weight','Sex','Berried','Molted','Habitat Type','Has Photo'];
+    const headers = ['Survey ID','Start Time','Date','Surveyor 1','Surveyor 2','Province','LLG','Sampling Site',
+      'Bait #','Crabs Found','Weather','Crab #','Cephalo Thoracic Length','Thoracic Length','Carapace Width','Weight','Sex','Berried','Molted','Habitat Type','Has Photo',
+      'Comments','Lat','Lon','GPS Accuracy (m)','End Time'];
     const aoa = [headers];
     rows.forEach(function(rec){
       const d = rec.data || {};
       const gps = d.gps || {};
-      const base = [rec.id, d.startTime, rec.survey_date, rec.surveyor1, d.surveyor2, rec.province || d.province, rec.llg || d.llg, rec.sampling_site, d.comments,
-        gps.lat||'', gps.lon||'', gps.accuracy||'', d.endTime];
+      const baseStart = [rec.id, d.startTime, rec.survey_date, rec.surveyor1, d.surveyor2, rec.province || d.province, rec.llg || d.llg, rec.sampling_site];
+      const baseEnd = [d.comments, gps.lat||'', gps.lon||'', gps.accuracy||'', d.endTime];
       const stations = d.baitStations || [];
-      if(stations.length === 0){ aoa.push(base.concat(['','','','','','','','','','','','',''])); }
+      if(stations.length === 0){ aoa.push(baseStart.concat(['','','','','','','','','','','','',''], baseEnd)); }
       else{ stations.forEach(function(b){
         const weatherStr = (b.weather||[]).join('; ');
-        if(!b.crabs || b.crabs.length===0){ aoa.push(base.concat([b.baitNumber, b.crabsFound, weatherStr,'','','','','','','','','',''])); }
-        else{ b.crabs.forEach(function(c,ci){ aoa.push(base.concat([b.baitNumber, b.crabsFound, weatherStr, ci+1, c.cephaloThoracicLength, c.thoracicLength, c.carapaceWidth, c.weight, c.sex, c.berried, c.molted, (c.habitat||[]).join('; '), c.photo?'Yes':'No'])); }); }
+        if(!b.crabs || b.crabs.length===0){ aoa.push(baseStart.concat([b.baitNumber, b.crabsFound, weatherStr,'','','','','','','','','',''], baseEnd)); }
+        else{ b.crabs.forEach(function(c,ci){ aoa.push(baseStart.concat([b.baitNumber, b.crabsFound, weatherStr, ci+1, c.cephaloThoracicLength, c.thoracicLength, c.carapaceWidth, c.weight, c.sex, c.berried, c.molted, (c.habitat||[]).join('; '), c.photo?'Yes':'No'], baseEnd)); }); }
       }); }
     });
     const ws = XLSX.utils.aoa_to_sheet(aoa);
