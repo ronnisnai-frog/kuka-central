@@ -374,9 +374,17 @@
                   <button class="btn-ghost" id="editSelectedBtn" disabled><i data-lucide="pencil" class="lucide-icon"></i> Edit</button>
                   <button class="btn" id="deleteSelectedBtn" disabled style="background:none; color:var(--alert); border:1.5px solid var(--alert); font-weight:600; font-size:0.82rem; padding:8px 14px;"><i data-lucide="trash-2" class="lucide-icon"></i> Delete</button>
                 </div>
-                <div class="actions">
-                  <button class="btn btn-secondary" id="exportSelectedBtn">Export Selected (<span id="selCount">0</span>)</button>
-                  <button class="btn btn-primary" id="exportAllBtn">Export All (Excel)</button>
+              </div>
+              <div class="toolbar" style="margin-top:10px; flex-wrap:wrap;">
+                <div class="actions" style="align-items:center;">
+                  <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; color:var(--tide);">Export Selected (<span id="selCount">0</span>):</span>
+                  <button class="btn btn-secondary" id="exportSelectedBtn">Summary</button>
+                  <button class="btn btn-secondary" id="exportSelectedFullBtn">Full</button>
+                </div>
+                <div class="actions" style="align-items:center;">
+                  <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; color:var(--tide);">Export All:</span>
+                  <button class="btn btn-primary" id="exportAllBtn">Summary</button>
+                  <button class="btn btn-primary" id="exportAllFullBtn">Full</button>
                 </div>
               </div>
               <div class="table-wrap">
@@ -1705,7 +1713,7 @@ document.getElementById('deleteSelectedBtn').addEventListener('click', async fun
 });
 
 /* ===== Export ===== */
-function buildWorkbookForType(type, rows){
+function buildSummaryWorkbookForType(type, rows){
   const wb = XLSX.utils.book_new();
   if(type === 'mudcrab'){
     const headers = ['Survey ID','Surveyor','Date','Province','LLG','Sampling Site','Tide Condition','Comments','Quadrat #','Crab #','Species','Sex','Carapace Width','Weight'];
@@ -1753,24 +1761,101 @@ function buildWorkbookForType(type, rows){
   }
   return wb;
 }
-function exportTypeAsExcel(type){
+
+function buildFullWorkbookForType(type, rows){
+  const wb = XLSX.utils.book_new();
+
+  if(type === 'mudcrab'){
+    const headers = ['Survey ID','Start Time','Date','Surveyor','Province','LLG','Sampling Site','Tide Condition','Comments','Lat','Lon','GPS Accuracy (m)','End Time',
+      'Quadrat #','Empty Burrows','Crabs Found','Crab #','Species','Sex','Berried','Molted','Carapace Width','Weight','Gear Used','Effort (min)','Has Photo'];
+    const aoa = [headers];
+    rows.forEach(function(rec){
+      const base = [rec.id, rec.start_time, rec.survey_date, rec.surveyor1, rec.province, rec.llg, rec.sampling_site, rec.tide_condition, rec.comments,
+        rec.gps?rec.gps.lat:'', rec.gps?rec.gps.lon:'', rec.gps?rec.gps.accuracy:'', rec.end_time];
+      const quadrats = rec.quadrats || [];
+      if(quadrats.length === 0){ aoa.push(base.concat(['','','','','','','','','','','','',''])); }
+      else{ quadrats.forEach(function(q, qi){
+        if(!q.crabs || q.crabs.length===0){ aoa.push(base.concat([qi+1, q.emptyBurrows, q.crabsFound,'','','','','','','','','',''])); }
+        else{ q.crabs.forEach(function(c,ci){ aoa.push(base.concat([qi+1, q.emptyBurrows, q.crabsFound, ci+1, c.species, c.sex, c.berried, c.molted, c.carapaceWidth, c.weight, c.gearUsed, c.effort, c.photo?'Yes':'No'])); }); }
+      }); }
+    });
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = headers.map(function(){return {wch:16};});
+    XLSX.utils.book_append_sheet(wb, ws, 'Mud Crab');
+  }
+
+  if(type === 'socioeconomic'){
+    const headers = ['Survey ID','Date','Surveyor','Full Name','Gender','Age','Marital Status','Province','District','LLG','Village','Contact Details','Consent',
+      'Q1 Harvest','Q2 Purpose','Q3 Main Income','Q3 Explain','Q4 Other Income','Q5 Frequency','Q5 Amount','Q6 Years','Q7 Income Change',
+      'Q8 Consume Freq','Q9 Protein Source','Q10 Food Supply Affected','Q10 Explain',
+      'Q11 Days/Week','Q12 Hours/Trip','Q13 Catch Trend','Q14 Size Change','Q15 Methods','Q15 Other','Q16 Materials','Q17 Selective','Q17 Explain',
+      'Q18 Sell Where','Q18 Other','Q19 Small','Q19 Medium','Q19 Large','Q20 Demand Change',
+      'Q21 Spawn Months','Q21 Other','Q22 Molt Months','Q22 Other','Q23 Large Period','Q23 Specify','Q24 Small Period','Q24 Specify','Q25 Habitats','Q25 Other','Q26 Active Time',
+      'Q27 Aware Rules','Q28 Management','Q28 Catch Limit','Q29 Set By','Q30 Restriction Effect',
+      'Q31 Population','Q32 Threats','Q32 Other','Q33 Actions'];
+    const aoa = [headers];
+    rows.forEach(function(rec){
+      const d = rec.data || {};
+      aoa.push([rec.id, rec.survey_date, rec.surveyor1, d.resp_fullname, d.resp_gender, d.resp_age, d.resp_marital, d.resp_province, d.resp_district, d.resp_llg, d.resp_village, d.resp_contact, d.consent?'Yes':'No',
+        d.q1_harvest, (d.q2_purpose||[]).join('; '), d.q3_mainincome, d.q3_explain, d.q4_otherincome, d.q5_freq, d.q5_amount, d.q6_years, d.q7_incomechange,
+        d.q8_consumefreq, d.q9_protein, d.q10_foodsupply, d.q10_explain,
+        d.q11_days, d.q12_hours, d.q13_catchtrend, d.q14_sizechange, (d.q15_methods||[]).join('; '), d.q15_other, d.q16_materials, d.q17_selective, d.q17_explain,
+        (d.q18_sellwhere||[]).join('; '), d.q18_other, d.q19_small, d.q19_medium, d.q19_large, d.q20_demandchange,
+        (d.q21_spawnmonths||[]).join('; '), d.q21_other, (d.q22_moltmonths||[]).join('; '), d.q22_other, d.q23_largeperiod, d.q23_specify, d.q24_smallperiod, d.q24_specify, (d.q25_habitats||[]).join('; '), d.q25_other, d.q26_activetime,
+        d.q27_awarerules, (d.q28_management||[]).join('; '), d.q28_catchlimit, (d.q29_setby||[]).join('; '), d.q30_restrictioneffect,
+        d.q31_population, (d.q32_threats||[]).join('; '), d.q32_other, d.q33_actions]);
+    });
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = headers.map(function(){return {wch:16};});
+    XLSX.utils.book_append_sheet(wb, ws, 'Socio-economic');
+  }
+
+  if(type === 'biological'){
+    const headers = ['Survey ID','Start Time','Date','Surveyor 1','Surveyor 2','Province','LLG','Sampling Site','Comments','Lat','Lon','GPS Accuracy (m)','End Time',
+      'Bait #','Crabs Found','Weather','Crab #','Cephalo Thoracic Length','Thoracic Length','Carapace Width','Weight','Sex','Berried','Molted','Habitat Type','Has Photo'];
+    const aoa = [headers];
+    rows.forEach(function(rec){
+      const d = rec.data || {};
+      const gps = d.gps || {};
+      const base = [rec.id, d.startTime, rec.survey_date, rec.surveyor1, d.surveyor2, rec.province || d.province, rec.llg || d.llg, rec.sampling_site, d.comments,
+        gps.lat||'', gps.lon||'', gps.accuracy||'', d.endTime];
+      const stations = d.baitStations || [];
+      if(stations.length === 0){ aoa.push(base.concat(['','','','','','','','','','','','',''])); }
+      else{ stations.forEach(function(b){
+        const weatherStr = (b.weather||[]).join('; ');
+        if(!b.crabs || b.crabs.length===0){ aoa.push(base.concat([b.baitNumber, b.crabsFound, weatherStr,'','','','','','','','','',''])); }
+        else{ b.crabs.forEach(function(c,ci){ aoa.push(base.concat([b.baitNumber, b.crabsFound, weatherStr, ci+1, c.cephaloThoracicLength, c.thoracicLength, c.carapaceWidth, c.weight, c.sex, c.berried, c.molted, (c.habitat||[]).join('; '), c.photo?'Yes':'No'])); }); }
+      }); }
+    });
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = headers.map(function(){return {wch:16};});
+    XLSX.utils.book_append_sheet(wb, ws, 'Biological');
+  }
+
+  return wb;
+}
+
+function exportTypeAsExcel(type, mode){
   const rows = rowsForSelectedType();
   if(rows.length === 0){ toast('No data to export for this survey yet.'); return; }
-  const wb = buildWorkbookForType(type, rows);
-  XLSX.writeFile(wb, 'kuka_'+type+'_'+Date.now()+'.xlsx');
-  toast('Exported '+rows.length+' surveys');
-  logActivity('Exported', SURVEY_META[type].title+' — '+rows.length+' survey'+(rows.length===1?'':'s'));
+  const wb = mode === 'full' ? buildFullWorkbookForType(type, rows) : buildSummaryWorkbookForType(type, rows);
+  XLSX.writeFile(wb, 'kuka_'+type+'_'+mode+'_'+Date.now()+'.xlsx');
+  toast('Exported '+rows.length+' surveys ('+mode+')');
+  logActivity('Exported', SURVEY_META[type].title+' — '+rows.length+' survey'+(rows.length===1?'':'s')+' — '+mode);
 }
-document.getElementById('exportAllBtn').addEventListener('click', function(){ exportTypeAsExcel(selectedType); });
-document.getElementById('exportSelectedBtn').addEventListener('click', function(){
+document.getElementById('exportAllBtn').addEventListener('click', function(){ exportTypeAsExcel(selectedType, 'summary'); });
+document.getElementById('exportAllFullBtn').addEventListener('click', function(){ exportTypeAsExcel(selectedType, 'full'); });
+function exportSelectedAsExcel(mode){
   const ids = Object.keys(selectedIds);
   if(ids.length === 0){ toast('Tick at least one survey to export.'); return; }
   const rows = rowsForSelectedType().filter(function(r){ return selectedIds[r.id]; });
-  const wb = buildWorkbookForType(selectedType, rows);
-  XLSX.writeFile(wb, 'kuka_'+selectedType+'_selected_'+Date.now()+'.xlsx');
-  toast('Exported '+rows.length+' selected survey'+(rows.length===1?'':'s'));
-  logActivity('Exported', SURVEY_META[selectedType].title+' — '+rows.length+' selected survey'+(rows.length===1?'':'s'));
-});
+  const wb = mode === 'full' ? buildFullWorkbookForType(selectedType, rows) : buildSummaryWorkbookForType(selectedType, rows);
+  XLSX.writeFile(wb, 'kuka_'+selectedType+'_selected_'+mode+'_'+Date.now()+'.xlsx');
+  toast('Exported '+rows.length+' selected survey'+(rows.length===1?'':'s')+' ('+mode+')');
+  logActivity('Exported', SURVEY_META[selectedType].title+' — '+rows.length+' selected survey'+(rows.length===1?'':'s')+' — '+mode);
+}
+document.getElementById('exportSelectedBtn').addEventListener('click', function(){ exportSelectedAsExcel('summary'); });
+document.getElementById('exportSelectedFullBtn').addEventListener('click', function(){ exportSelectedAsExcel('full'); });
 
 /* ===== Settings sub-navigation ===== */
 document.querySelectorAll('.settings-subnav-item').forEach(function(el){
@@ -1900,7 +1985,7 @@ document.getElementById('activityExportBtn').addEventListener('click', function(
   ['mudcrab','socioeconomic','biological'].forEach(function(type){
     const rows = allRows.filter(function(r){ return r.survey_type === type; });
     if(rows.length === 0) return;
-    const typeWb = buildWorkbookForType(type, rows);
+    const typeWb = buildFullWorkbookForType(type, rows);
     typeWb.SheetNames.forEach(function(name){ XLSX.utils.book_append_sheet(wb, typeWb.Sheets[name], name); });
   });
   XLSX.writeFile(wb, 'kuka_all_data_'+Date.now()+'.xlsx');
