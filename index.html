@@ -10,19 +10,19 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
   :root{
-    --mangrove-dark:#004B49;
-    --mangrove-mid:#0A5E5B;
-    --sand:#F2F7FA;
-    --sand-dim:#E3EEF3;
-    --shell:#60A5FA;
-    --shell-dim:#3B82F6;
-    --tide:#5B7A88;
-    --alert:#DC2626;
-    --ink:#16232A;
+    --mangrove-dark:#0B4A3C;
+    --mangrove-mid:#0E5C4A;
+    --sand:#F6F3EA;
+    --sand-dim:#EFEADC;
+    --shell:#0B4A3C;
+    --shell-dim:#083D31;
+    --tide:#6B7568;
+    --alert:#C0392B;
+    --ink:#20261F;
     --paper:#FFFFFF;
-    --line:#DCE8EE;
-    --aqua:#10B981;
-    --aqua-dim:#0C9268;
+    --line:#E6E1D3;
+    --aqua:#2ED9A7;
+    --aqua-dim:#1FAE85;
     --aqua-bg:#DEF7EC;
     --orange:#C4622D;
     --orange-dim:#a3521f;
@@ -43,28 +43,40 @@
   .brand-logo{ height:1.15em; width:1.15em; object-fit:contain; vertical-align:-0.18em; margin-right:8px; filter:invert(1) brightness(1.6); }
 
   /* ===== Login screen ===== */
-  #loginScreen{
+  #loginScreen, #resetPasswordScreen{
     position:fixed; inset:0; display:flex;
     align-items:center; justify-content:center; z-index:200;
-    background-image:url('./login-bg.jpg');
-    background-size:cover; background-position:center; background-repeat:no-repeat;
+    background:#FAFAF7; overflow:hidden;
   }
-  #loginScreen .card{ position:relative; z-index:2; width:100%; max-width:380px; background:var(--paper); border-radius:14px; padding:32px 28px;
-    box-shadow:0 20px 60px rgba(0,20,20,0.35); }
-  #loginScreen h1{ text-align:center; color:var(--mangrove-dark); font-size:1.6rem; margin-bottom:2px; }
-  #loginScreen .brand-logo{ filter:none; }
-  #loginScreen p.sub{ text-align:center; color:var(--tide); font-size:0.85rem; margin-bottom:22px; }
-  #loginScreen label{ display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin:14px 0 6px; }
-  #loginScreen input{ width:100%; padding:11px; border:1.5px solid var(--line); border-radius:7px; font-size:1rem; background:var(--sand); }
-  #loginErr{ display:none; background:#F7DEDE; color:var(--alert); font-size:0.82rem; padding:9px 12px; border-radius:7px; margin-top:14px; }
-  #loginErr.show{ display:block; }
+  #loginScreen .blob, #resetPasswordScreen .blob{ position:absolute; border-radius:50%; filter:blur(70px); opacity:0.55; z-index:0; }
+  #loginScreen .blob1, #resetPasswordScreen .blob1{ width:420px; height:420px; background:var(--aqua); top:-100px; left:-120px; }
+  #loginScreen .blob2, #resetPasswordScreen .blob2{ width:380px; height:380px; background:var(--orange-bg); bottom:-140px; right:-100px; opacity:0.7; }
+  #loginScreen .blob3, #resetPasswordScreen .blob3{ width:300px; height:300px; background:var(--mangrove-mid); bottom:20%; left:5%; opacity:0.35; }
+  #loginScreen .card, #resetPasswordScreen .card{ position:relative; z-index:2; width:100%; max-width:400px; background:rgba(255,255,255,0.85); backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,0.6); border-radius:20px; padding:34px 30px; box-shadow:0 20px 60px rgba(11,74,60,0.15); }
+  #loginScreen .brandline, #resetPasswordScreen .brandline{ display:flex; align-items:center; justify-content:center; gap:5px; margin-top:20px; padding-top:16px; border-top:1px solid var(--line); white-space:nowrap; }
+  #loginScreen .brandline .brand-logo, #resetPasswordScreen .brandline .brand-logo{ filter:none; height:0.85em; margin-right:0; flex:none; }
+  #loginScreen .brandline span, #resetPasswordScreen .brandline span{ font-weight:600; font-size:0.6rem; color:var(--tide); letter-spacing:0.1px; }
+  #loginScreen h1, #resetPasswordScreen h1{ text-align:center; color:var(--ink); font-size:1.55rem; margin-bottom:4px; font-family:Georgia,serif; }
+  #loginScreen p.sub, #resetPasswordScreen p.sub{ text-align:center; color:var(--tide); font-size:0.85rem; margin-bottom:24px; }
+  #loginScreen label, #resetPasswordScreen label{ display:block; font-size:0.8rem; font-weight:600; color:var(--ink); margin:14px 0 6px; }
+  #loginScreen input, #resetPasswordScreen input{ width:100%; padding:12px; border:1.5px solid var(--line); border-radius:10px; font-size:0.92rem; background:rgba(255,255,255,0.7); }
+  #loginErr, #resetErr{ display:none; background:#F7DEDE; color:var(--alert); font-size:0.82rem; padding:9px 12px; border-radius:7px; margin-top:14px; }
+  #loginErr.show, #resetErr.show{ display:block; }
+  #loginDivider{ display:flex; align-items:center; gap:10px; margin:22px 0 16px; }
+  #loginDivider .line{ flex:1; height:1px; background:var(--line); }
+  #loginDivider span{ font-size:0.68rem; font-weight:700; letter-spacing:0.5px; color:var(--tide); text-transform:uppercase; }
+  .oauth-btn{ width:100%; display:flex; align-items:center; justify-content:center; gap:10px; padding:11px; border-radius:10px; border:1.5px solid var(--line);
+    background:rgba(255,255,255,0.7); font-size:0.88rem; font-weight:600; color:var(--ink); cursor:pointer; font-family:inherit; }
+  .oauth-btn:hover{ background:#fff; }
+  #forgotPasswordLink{ display:block; text-align:center; margin-top:18px; font-size:0.82rem; color:var(--mangrove-mid); font-weight:600; cursor:pointer; text-decoration:none; }
 
   /* ===== App shell ===== */
   #appShell{ display:none; }
   #appShell.show{ display:block; }
 
   #topbar{ background:var(--mangrove-dark); color:var(--sand); display:flex; align-items:center; justify-content:space-between; padding:12px 22px; }
-  #topbar .title{ display:flex; align-items:center; font-size:1.05rem; font-weight:700; font-family:Georgia,serif; flex:1; }
+  #topbar .title{ display:flex; align-items:center; font-size:1.15rem; font-weight:700; font-family:Georgia,serif; flex:1; }
   #topbar .centerName{ flex:1; text-align:center; font-size:0.92rem; font-weight:600; color:#D8E4DD; font-family:Georgia,serif; }
   #topbar .right{ display:flex; align-items:center; gap:14px; flex:1; justify-content:flex-end; }
   #topbar .userlabel{ font-size:0.8rem; color:#B9C9BE; }
@@ -81,8 +93,8 @@
   #layout{ display:flex; align-items:flex-start; }
 
   #sidebar{ width:250px; flex:none; background:var(--paper); border-right:1px solid var(--line); min-height:calc(100vh - 96px); padding:18px 0; }
-  .sidebar-label{ padding:8px 20px; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--tide); font-weight:700; }
-  .survey-item{ padding:12px 20px; font-size:0.74rem; cursor:pointer; border-left:3px solid transparent; font-weight:600; white-space:nowrap; letter-spacing:0.1px; }
+  .sidebar-label{ padding:10px 20px 8px; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--tide); font-weight:700; }
+  .survey-item{ padding:12px 20px; font-size:0.92rem; cursor:pointer; border-left:3px solid transparent; font-weight:600; letter-spacing:0.1px; line-height:1.3; }
   .survey-item:hover{ background:var(--sand-dim); }
   .survey-item.active{ background:var(--sand-dim); border-left-color:var(--shell); color:var(--shell-dim); }
 
@@ -115,6 +127,44 @@
   .stat-box{ flex:1; text-align:center; padding:16px; background:var(--sand-dim); border-radius:8px; }
   .stat-box .n{ font-size:1.7rem; font-weight:700; color:var(--mangrove-mid); font-family:Georgia,serif; }
   .stat-box .l{ font-size:0.7rem; color:var(--tide); text-transform:uppercase; margin-top:2px; }
+
+  .stat-row-tasko{ display:flex; gap:16px; margin-bottom:18px; flex-wrap:wrap; }
+  .tstat-card{ flex:1; min-width:170px; background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:16px; position:relative;
+    box-shadow: 0 2px 6px rgba(27,46,40,0.06), 0 8px 18px rgba(27,46,40,0.09); }
+  .tstat-card.hero{ background:var(--mangrove-dark); color:#fff; border:none; }
+  .tstat-icon{ position:absolute; top:14px; right:14px; width:28px; height:28px; border-radius:50%; background:var(--sand-dim); display:flex; align-items:center; justify-content:center; color:var(--mangrove-dark); }
+  .tstat-icon .lucide-icon{ width:15px; height:15px; }
+  .tstat-icon.aqua{ background:var(--aqua-bg); color:var(--aqua-dim); }
+  .tstat-icon.orange{ background:var(--orange-bg); color:var(--orange-dim); }
+  .tstat-card.hero .tstat-icon{ background:rgba(255,255,255,0.18); color:#fff; }
+  .tstat-label{ font-size:0.78rem; color:var(--tide); margin-bottom:8px; }
+  .tstat-card.hero .tstat-label{ color:#BFE0D4; }
+  .tstat-num{ font-size:1.7rem; font-weight:700; font-family:Georgia,serif; margin-bottom:4px; }
+  .tstat-foot{ font-size:0.72rem; color:var(--aqua-dim); }
+  .tstat-foot.link{ cursor:pointer; font-weight:700; }
+  .tstat-foot.orange-text{ color:var(--orange-dim); }
+  .tstat-card.hero .tstat-foot{ color:#9FEAD0; }
+
+  .two-col-tasko{ display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
+  .panel-tasko{ background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:20px; flex:1; min-width:280px;
+    box-shadow: 0 2px 6px rgba(27,46,40,0.06), 0 8px 18px rgba(27,46,40,0.09); }
+  .panel-tasko.side{ display:flex; flex-direction:column; gap:18px; }
+  .panel-head-tasko{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .chart-foot-tasko{ display:flex; justify-content:space-between; font-size:0.76rem; color:var(--tide); margin-top:10px; padding-top:10px; border-top:1px solid var(--line); }
+  .chart-foot-tasko b{ color:var(--aqua-dim); }
+  .reminder-card-tasko{ background:var(--sand); border-radius:10px; padding:14px; }
+  .reminder-card-tasko .t{ font-weight:700; font-size:0.86rem; }
+  .reminder-card-tasko .s{ font-size:0.76rem; color:var(--tide); margin:2px 0 10px; }
+  .surveyor-row{ display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); }
+  .surveyor-row:last-child{ border-bottom:none; }
+  .surveyor-row .info{ flex:1; min-width:0; }
+  .surveyor-row .info .name{ font-weight:700; font-size:0.86rem; }
+  .surveyor-row .info .sub{ font-size:0.75rem; color:var(--tide); }
+  .promo-card-tasko{ background:var(--mangrove-dark); border-radius:14px; padding:20px; color:#fff; flex:1; min-width:240px; }
+  .promo-card-tasko h3{ color:#fff; font-size:1.05rem; margin-bottom:4px; }
+  .promo-card-tasko p{ font-size:0.78rem; color:#BFE0D4; margin:0 0 14px; }
+  .promo-btn-tasko{ display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.14); border:none; color:#fff; border-radius:8px; padding:10px 14px; font-size:0.8rem; margin-bottom:8px; width:100%; text-align:left; cursor:pointer; font-family:inherit; text-decoration:none; box-sizing:border-box; }
+  .promo-btn-tasko:hover{ background:rgba(255,255,255,0.22); }
 
   .quicklink{ display:flex; align-items:center; justify-content:space-between; padding:11px 4px; font-size:0.86rem; font-weight:600; color:var(--ink); border-bottom:1px solid var(--sand-dim); cursor:pointer; background:none; border-left:none; border-right:none; border-top:none; width:100%; text-align:left; font-family:inherit; }
   .dropdown-item{ display:flex; align-items:center; gap:10px; justify-content:flex-start; padding:11px 16px; font-size:0.86rem; font-weight:600; color:var(--ink); border:none; cursor:pointer; background:none; width:100%; text-align:left; font-family:inherit; }
@@ -215,16 +265,42 @@
 <body>
 
 <div id="loginScreen">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
   <div class="card">
-    <h1><img src="./mudcrab-icon.png" class="brand-logo" alt=""> KUKA Central</h1>
-    <p class="sub">Fisheries Data Server — Papua New Guinea</p>
+    <h1>Welcome Back</h1>
+    <p class="sub">Sign in to your account to continue</p>
     <div id="loginErr"></div>
-    <label>Email</label>
-    <input type="text" id="loginEmail" autocomplete="username">
+    <label>Email Address</label>
+    <input type="text" id="loginEmail" autocomplete="username" placeholder="Enter your email">
     <label>Password</label>
-    <input type="text" id="loginPassword" autocomplete="current-password" style="-webkit-text-security:disc; text-security:disc;">
-    <button class="btn btn-primary" id="loginBtn" style="width:100%; margin-top:20px;">Log In</button>
-    <p class="sub" style="margin-top:16px;">Login using your KUKA Account Credentials.</p>
+    <input type="text" id="loginPassword" autocomplete="current-password" placeholder="Enter your password" style="-webkit-text-security:disc; text-security:disc;">
+    <button class="btn btn-primary" id="loginBtn" style="width:100%; margin-top:20px;">Sign In</button>
+    <div id="loginDivider"><div class="line"></div><span>Or continue with</span><div class="line"></div></div>
+    <button class="oauth-btn" id="googleLoginBtn">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.98v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.98A9 9 0 0 0 0 9c0 1.45.35 2.83.98 4.03l2.97-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.46 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .98 4.97l2.97 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
+      Continue with Google
+    </button>
+    <a id="forgotPasswordLink">Forgot your password?</a>
+    <div class="brandline"><img src="./mudcrab-icon.png" class="brand-logo" alt=""><span>KUKA Central — Fisheries Data Server, Papua New Guinea</span></div>
+  </div>
+</div>
+
+<div id="resetPasswordScreen" style="display:none;">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+  <div class="card">
+    <h1>Set New Password</h1>
+    <p class="sub">Choose a new password for your KUKA Central account</p>
+    <div id="resetErr"></div>
+    <label>New Password</label>
+    <input type="text" id="resetPassword1" placeholder="At least 6 characters" style="-webkit-text-security:disc; text-security:disc;">
+    <label>Confirm New Password</label>
+    <input type="text" id="resetPassword2" placeholder="Re-enter password" style="-webkit-text-security:disc; text-security:disc;">
+    <button class="btn btn-primary" id="resetPasswordSaveBtn" style="width:100%; margin-top:20px;">Save New Password</button>
+    <div class="brandline"><img src="./mudcrab-icon.png" class="brand-logo" alt=""><span>KUKA Central — Fisheries Data Server, Papua New Guinea</span></div>
   </div>
 </div>
 
@@ -293,30 +369,86 @@
 
         <!-- ===== SUMMARY ===== -->
         <section class="page active" id="page-summary">
-          <div class="card">
-            <h3 id="sumTitle">Mud Crab Survey</h3>
-            <p class="sub" id="sumDesc">Quadrat-based mud crab stock assessment</p>
-            <div class="info-grid">
-              <div class="info-item"><div class="k">Status</div><div class="v"><span class="status-pill">● Live</span></div></div>
-              <div class="info-item"><div class="k">Questions</div><div class="v" id="sumQuestions">—</div></div>
-              <div class="info-item"><div class="k">Last Updated</div><div class="v" id="sumUpdated">—</div></div>
-              <div class="info-item"><div class="k">Region</div><div class="v">Papua New Guinea</div></div>
-              <div class="info-item"><div class="k">Category</div><div class="v">Fisheries</div></div>
+          <div id="sumTitle" style="display:none;"></div>
+          <div id="sumDesc" style="display:none;"></div>
+          <div id="sumQuestions" style="display:none;"></div>
+          <div id="sumUpdated" style="display:none;"></div>
+
+          <div style="margin-bottom:18px;">
+            <h1 id="sumHeading" style="font-size:1.5rem; margin-bottom:2px;">Mud Crab Survey</h1>
+            <p class="sub" id="sumSubheading" style="margin:0;">Quadrat-based mud crab stock assessment</p>
+          </div>
+
+          <div class="stat-row-tasko">
+            <div class="tstat-card hero">
+              <div class="tstat-icon"><i data-lucide="clipboard-list" class="lucide-icon"></i></div>
+              <div class="tstat-label">Total Submissions</div>
+              <div class="tstat-num" id="tstatTotal">0</div>
+              <div class="tstat-foot" id="tstatTotalFoot">— this week</div>
+            </div>
+            <div class="tstat-card">
+              <div class="tstat-icon aqua"><i data-lucide="check" class="lucide-icon"></i></div>
+              <div class="tstat-label">Synced</div>
+              <div class="tstat-num" id="tstatSynced">0</div>
+              <div class="tstat-foot link" data-goto-tab="data">View table ›</div>
+            </div>
+            <div class="tstat-card">
+              <div class="tstat-icon orange"><i data-lucide="hourglass" class="lucide-icon"></i></div>
+              <div class="tstat-label">Pending Review</div>
+              <div class="tstat-num" id="tstatPending">0</div>
+              <div class="tstat-foot link orange-text" data-goto-tab="data">Manage status ›</div>
+            </div>
+            <div class="tstat-card">
+              <div class="tstat-icon"><i data-lucide="map-pin" class="lucide-icon"></i></div>
+              <div class="tstat-label">Provinces</div>
+              <div class="tstat-num" id="tstatProvinces">0</div>
+              <div class="tstat-foot link" data-goto-tab="data" data-goto-view="map">View map ›</div>
             </div>
           </div>
 
-          <div class="card">
-            <h3>Submissions</h3>
-            <div class="divider-fancy"><div class="dash"></div><div class="mark"></div><div class="dash"></div></div>
-            <div class="period-tabs">
-              <button class="active" data-period="7">Past 7 days</button>
-              <button data-period="31">Past 31 days</button>
-              <button data-period="90">Past 3 months</button>
-              <button data-period="365">Past 12 months</button>
+          <div class="two-col-tasko">
+            <div class="panel-tasko" style="flex:1.4;">
+              <div class="panel-head-tasko"><h3>Submissions This Week</h3><span style="font-size:0.75rem; color:var(--tide);">● Weekly Activity</span></div>
+              <div id="weekChartBars" style="height:150px; display:flex; align-items:flex-end; gap:10px;"></div>
+              <div class="chart-foot-tasko"><span>Average: <b id="chartAvg">—</b></span><span>Peak: <b id="chartPeak">—</b></span></div>
             </div>
-            <div class="stat-row">
-              <div class="stat-box"><div class="n" id="sumPeriodCount">0</div><div class="l" id="sumPeriodLabel">Past 7 days</div></div>
-              <div class="stat-box"><div class="n" id="sumTotalCount">0</div><div class="l">Total (all time)</div></div>
+            <div class="panel-tasko side">
+              <div>
+                <div class="panel-head-tasko"><h3 style="font-size:1rem;">Reminders</h3></div>
+                <div class="reminder-card-tasko" id="reminderCard">
+                  <div class="t" id="reminderText">All caught up</div>
+                  <div class="s" id="reminderSub">No pending reviews right now</div>
+                  <button class="btn btn-primary" style="width:100%;" id="reminderBtn">Review Now</button>
+                </div>
+              </div>
+              <div>
+                <div class="panel-head-tasko"><h3 style="font-size:1rem;">Review Progress</h3></div>
+                <div style="display:flex; flex-direction:column; align-items:center; padding:6px 0;">
+                  <svg width="120" height="120" viewBox="0 0 130 130">
+                    <circle cx="65" cy="65" r="52" fill="none" stroke="var(--sand-dim)" stroke-width="14"/>
+                    <circle id="donutApproved" cx="65" cy="65" r="52" fill="none" stroke="var(--aqua)" stroke-width="14" stroke-dasharray="0 327" stroke-linecap="round" transform="rotate(-90 65 65)"/>
+                    <text id="donutPct" x="65" y="62" text-anchor="middle" font-size="22" font-weight="700" fill="var(--mangrove-dark)" font-family="Georgia,serif">0%</text>
+                    <text x="65" y="80" text-anchor="middle" font-size="9" fill="var(--tide)">Reviewed</text>
+                  </svg>
+                  <div style="display:flex; gap:14px; font-size:0.72rem; color:var(--tide); margin-top:8px;">
+                    <span><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--aqua); margin-right:5px;"></span>Approved</span>
+                    <span><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--orange); margin-right:5px;"></span>Pending</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="two-col-tasko">
+            <div class="panel-tasko" style="flex:1.4;">
+              <div class="panel-head-tasko"><h3>Surveyor Activity</h3></div>
+              <div id="surveyorActivityList"></div>
+            </div>
+            <div class="promo-card-tasko">
+              <h3>Get KUKA Collect</h3>
+              <p>Onboard a new surveyor onto the mobile field app.</p>
+              <a class="promo-btn-tasko" href="https://ronnisnai-frog.github.io/kuka-survey/" target="_blank"><i data-lucide="smartphone" class="lucide-icon"></i> Open KUKA Collect</a>
+              <button class="promo-btn-tasko" id="copyInviteLinkBtn"><i data-lucide="clipboard" class="lucide-icon"></i> Copy Invite Link</button>
             </div>
           </div>
         </section>
@@ -468,9 +600,10 @@
 
                 <div class="card">
                   <h3>Team Access</h3>
-                  <p class="sub">Manage who can request access from the Users tab. Portal (KUKA Central) access is currently limited to a single admin account.</p>
+                  <p class="sub">Manage who can request access from the Users tab.</p>
                   <div class="divider-fancy"><div class="dash"></div><div class="mark"></div><div class="dash"></div></div>
                   <div class="team-member"><div class="avatar">R</div><div>ronnisnai123@gmail.com — Admin (Portal + Mobile)</div></div>
+                  <div class="team-member"><div class="avatar" style="background:var(--orange);">TM</div><div>tmatainaho@fisheries.gov.pg — Admin (Portal) <span class="badge pending" style="margin-left:6px;">Pending invite</span></div></div>
                 </div>
 
                 <div class="card" style="border-color:rgba(178,58,58,0.2);">
@@ -809,7 +942,8 @@
 <script>
 const SUPABASE_URL = "https://spwdpzcuyrwjdhvluadu.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNwd2RwemN1eXJ3amRodmx1YWR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5OTQyOTYsImV4cCI6MjA5NjU3MDI5Nn0.xoI33qTtwT0SMxY_uJGQ0xSWE1o3Q0UgifguMyjvso8";
-const ADMIN_EMAIL = "ronnisnai123@gmail.com";
+const ADMIN_EMAILS = ["ronnisnai123@gmail.com", "tmatainaho@fisheries.gov.pg"];
+function isAdminEmail(email){ return ADMIN_EMAILS.includes(email); }
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const SURVEY_META = {
@@ -821,7 +955,6 @@ const SURVEY_META = {
 let currentUser = null;
 let allRows = [];
 let selectedType = 'mudcrab';
-let selectedPeriod = 7;
 let selectedIds = {};
 let mapInst = null;
 
@@ -869,13 +1002,14 @@ document.getElementById('loginBtn').addEventListener('click', async function(){
   const password = document.getElementById('loginPassword').value;
   const errEl = document.getElementById('loginErr');
   errEl.classList.remove('show');
+  errEl.style.background = ''; errEl.style.color = '';
   if(!email || !password){ errEl.textContent = 'Please enter both email and password.'; errEl.classList.add('show'); return; }
   const btn = document.getElementById('loginBtn');
-  btn.disabled = true; btn.textContent = 'Logging in…';
+  btn.disabled = true; btn.textContent = 'Signing in…';
   try{
     const result = await supabaseClient.auth.signInWithPassword({ email, password });
     if(result.error) throw result.error;
-    if(result.data.user.email !== ADMIN_EMAIL){
+    if(!isAdminEmail(result.data.user.email)){
       await supabaseClient.auth.signOut();
       errEl.textContent = 'This account does not have Portal access.';
       errEl.classList.add('show');
@@ -887,7 +1021,37 @@ document.getElementById('loginBtn').addEventListener('click', async function(){
     errEl.textContent = err.message || 'Login failed. Please try again.';
     errEl.classList.add('show');
   } finally {
-    btn.disabled = false; btn.textContent = 'Log In';
+    btn.disabled = false; btn.textContent = 'Sign In';
+  }
+});
+document.getElementById('googleLoginBtn').addEventListener('click', async function(){
+  try{
+    const result = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
+    if(result.error){
+      const errEl = document.getElementById('loginErr');
+      errEl.textContent = 'Google sign-in is not yet set up for this project.';
+      errEl.classList.add('show');
+    }
+  }catch(err){
+    const errEl = document.getElementById('loginErr');
+    errEl.textContent = 'Could not start Google sign-in. Check your connection.';
+    errEl.classList.add('show');
+  }
+});
+document.getElementById('forgotPasswordLink').addEventListener('click', async function(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const errEl = document.getElementById('loginErr');
+  errEl.classList.remove('show');
+  if(!email){ errEl.textContent = 'Enter your email above first, then tap "Forgot your password?" again.'; errEl.classList.add('show'); return; }
+  try{
+    const result = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+    if(result.error){ errEl.textContent = result.error.message; errEl.classList.add('show'); return; }
+    errEl.style.background = 'var(--aqua-bg)'; errEl.style.color = 'var(--aqua-dim)';
+    errEl.textContent = 'Password reset link sent to '+email+'. Check your inbox.';
+    errEl.classList.add('show');
+  }catch(err){
+    errEl.textContent = 'Could not send reset link. Check your connection.';
+    errEl.classList.add('show');
   }
 });
 document.getElementById('logoutBtn').addEventListener('click', async function(){
@@ -1357,33 +1521,115 @@ async function loadAllData(){
 /* ===== Summary ===== */
 function renderSummary(){
   const meta = SURVEY_META[selectedType];
-  document.getElementById('sumTitle').textContent = meta.title;
-  document.getElementById('sumDesc').textContent = meta.desc;
-  document.getElementById('sumQuestions').textContent = meta.questions;
-  document.getElementById('sumUpdated').textContent = meta.updated;
+  document.getElementById('sumHeading').textContent = meta.title;
+  document.getElementById('sumSubheading').textContent = meta.desc;
   renderSummaryStats();
 }
 function renderSummaryStats(){
   const rows = rowsForSelectedType();
   const now = new Date();
-  const periodMs = selectedPeriod * 24 * 60 * 60 * 1000;
-  const periodCount = rows.filter(function(r){
-    if(!r.submitted_at) return false;
-    const d = new Date(r.submitted_at);
-    return (now - d) <= periodMs;
-  }).length;
-  document.getElementById('sumPeriodCount').textContent = periodCount;
-  document.getElementById('sumTotalCount').textContent = rows.length;
-  const labels = {7:'Past 7 days', 31:'Past 31 days', 90:'Past 3 months', 365:'Past 12 months'};
-  document.getElementById('sumPeriodLabel').textContent = labels[selectedPeriod];
-}
-document.querySelectorAll('.period-tabs button').forEach(function(el){
-  el.addEventListener('click', function(){
-    document.querySelectorAll('.period-tabs button').forEach(function(b){b.classList.remove('active');});
-    el.classList.add('active');
-    selectedPeriod = parseInt(el.dataset.period);
-    renderSummaryStats();
+
+  // Top stat cards
+  const weekMs = 7 * 24 * 60 * 60 * 1000;
+  const thisWeekCount = rows.filter(function(r){ return r.submitted_at && (now - new Date(r.submitted_at)) <= weekMs; }).length;
+  document.getElementById('tstatTotal').textContent = rows.length;
+  document.getElementById('tstatTotalFoot').textContent = '↗ +'+thisWeekCount+' this week';
+
+  const syncedRows = rows.filter(function(r){ return r.synced !== false; });
+  document.getElementById('tstatSynced').textContent = syncedRows.length;
+
+  const pendingRows = rows.filter(function(r){ return !r.review_status || r.review_status === 'not_reviewed' || r.review_status === 'on_hold'; });
+  document.getElementById('tstatPending').textContent = pendingRows.length;
+
+  const provinces = new Set(rows.map(getProvince).filter(function(p){ return p && p !== 'Unknown'; }));
+  document.getElementById('tstatProvinces').textContent = provinces.size;
+
+  // Weekly bar chart — last 7 calendar days
+  const dayLabels = ['S','M','T','W','T','F','S'];
+  const days = [];
+  for(let i = 6; i >= 0; i--){
+    const d = new Date(now); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
+    days.push(d);
+  }
+  const counts = days.map(function(day){
+    const next = new Date(day); next.setDate(next.getDate()+1);
+    return rows.filter(function(r){
+      if(!r.submitted_at) return false;
+      const t = new Date(r.submitted_at);
+      return t >= day && t < next;
+    }).length;
   });
+  const maxCount = Math.max(1, Math.max.apply(null, counts));
+  const barsHtml = counts.map(function(c, i){
+    const pct = Math.round((c / maxCount) * 100);
+    const color = i === days.length-1 ? 'var(--mangrove-dark)' : (i % 2 === 0 ? 'var(--aqua)' : 'var(--mangrove-mid)');
+    return '<div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%;">'+
+      '<div style="width:100%; height:'+Math.max(pct,4)+'%; background:'+color+'; border-radius:6px 6px 0 0;" title="'+c+' submissions"></div>'+
+      '<div style="font-size:0.68rem; color:var(--tide); margin-top:6px;">'+dayLabels[days[i].getDay()]+'</div></div>';
+  }).join('');
+  document.getElementById('weekChartBars').innerHTML = barsHtml;
+  const total7 = counts.reduce(function(a,b){return a+b;}, 0);
+  document.getElementById('chartAvg').textContent = (total7/7).toFixed(1)+'/day';
+  const peakIdx = counts.indexOf(Math.max.apply(null, counts));
+  document.getElementById('chartPeak').textContent = counts[peakIdx]+' ('+dayLabels[days[peakIdx].getDay()]+')';
+
+  // Review progress donut
+  const approvedCount = rows.filter(function(r){ return r.review_status === 'approved'; }).length;
+  const pct = rows.length > 0 ? Math.round((approvedCount / rows.length) * 100) : 0;
+  const circumference = 2 * Math.PI * 52;
+  document.getElementById('donutApproved').setAttribute('stroke-dasharray', (circumference*pct/100)+' '+circumference);
+  document.getElementById('donutPct').textContent = pct+'%';
+
+  // Reminders card
+  if(pendingRows.length > 0){
+    document.getElementById('reminderText').textContent = pendingRows.length+' submission'+(pendingRows.length===1?'':'s')+' pending review';
+    document.getElementById('reminderSub').textContent = meta.title+' — check Data tab';
+    document.getElementById('reminderBtn').style.display = 'block';
+  } else {
+    document.getElementById('reminderText').textContent = 'All caught up';
+    document.getElementById('reminderSub').textContent = 'No pending reviews right now';
+    document.getElementById('reminderBtn').style.display = 'none';
+  }
+
+  // Surveyor activity list
+  const bySurveyor = {};
+  rows.forEach(function(r){
+    const name = r.surveyor1 || 'Unknown';
+    if(!bySurveyor[name]) bySurveyor[name] = { synced:0, pending:0, lastSite:'', lastDate:'' };
+    if(r.synced !== false){ bySurveyor[name].synced++; } else { bySurveyor[name].pending++; }
+    if(!bySurveyor[name].lastDate || (r.survey_date && r.survey_date > bySurveyor[name].lastDate)){
+      bySurveyor[name].lastDate = r.survey_date || '';
+      bySurveyor[name].lastSite = getLabel(r);
+    }
+  });
+  const names = Object.keys(bySurveyor).sort(function(a,b){ return (bySurveyor[b].synced+bySurveyor[b].pending) - (bySurveyor[a].synced+bySurveyor[a].pending); });
+  const listEl = document.getElementById('surveyorActivityList');
+  if(names.length === 0){
+    listEl.innerHTML = '<p class="sub">No submissions yet for this survey type.</p>';
+  } else {
+    listEl.innerHTML = names.slice(0,6).map(function(name){
+      const s = bySurveyor[name];
+      const initials = getInitials(name, '');
+      const tagClass = s.pending > 0 ? 'pending' : 'approved';
+      const tagText = s.pending > 0 ? (s.pending+' pending') : (s.synced+' synced');
+      return '<div class="surveyor-row"><div class="avatar">'+escapeHtml(initials)+'</div>'+
+        '<div class="info"><div class="name">'+escapeHtml(name)+'</div><div class="sub">Last: '+escapeHtml(s.lastSite||'—')+(s.lastDate?', '+escapeHtml(s.lastDate):'')+'</div></div>'+
+        '<span class="badge '+tagClass+'">'+escapeHtml(tagText)+'</span></div>';
+    }).join('');
+  }
+  refreshLucideIcons();
+}
+document.querySelectorAll('[data-goto-tab]').forEach(function(el){
+  el.addEventListener('click', function(){
+    goToTab(el.dataset.gotoTab);
+    if(el.dataset.gotoView){ setTimeout(function(){ showDataView(el.dataset.gotoView); }, 50); }
+  });
+});
+document.getElementById('reminderBtn').addEventListener('click', function(){ goToTab('data'); });
+document.getElementById('copyInviteLinkBtn').addEventListener('click', function(){
+  const url = 'https://ronnisnai-frog.github.io/kuka-survey/';
+  if(navigator.clipboard){ navigator.clipboard.writeText(url); toast('Link copied to clipboard'); }
+  else{ toast(url); }
 });
 
 /* ===== Users tab ===== */
@@ -2024,10 +2270,45 @@ function renderMap(){
   if(points.length > 0){ mapInst.fitBounds(points, { padding:[30,30], maxZoom:12 }); }
 }
 
+/* ===== Password Recovery ===== */
+supabaseClient.auth.onAuthStateChange(function(event, session){
+  if(event === 'PASSWORD_RECOVERY'){
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appShell').classList.remove('show');
+    document.getElementById('resetPasswordScreen').style.display = 'flex';
+  }
+});
+document.getElementById('resetPasswordSaveBtn').addEventListener('click', async function(){
+  const pw1 = document.getElementById('resetPassword1').value;
+  const pw2 = document.getElementById('resetPassword2').value;
+  const errEl = document.getElementById('resetErr');
+  errEl.classList.remove('show'); errEl.style.background=''; errEl.style.color='';
+  if(!pw1 || pw1.length < 6){ errEl.textContent = 'Password must be at least 6 characters.'; errEl.classList.add('show'); return; }
+  if(pw1 !== pw2){ errEl.textContent = 'Passwords do not match.'; errEl.classList.add('show'); return; }
+  const btn = document.getElementById('resetPasswordSaveBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try{
+    const result = await supabaseClient.auth.updateUser({ password: pw1 });
+    if(result.error){ errEl.textContent = result.error.message; errEl.classList.add('show'); return; }
+    await supabaseClient.auth.signOut();
+    document.getElementById('resetPasswordScreen').style.display = 'none';
+    showLogin();
+    const loginErrEl = document.getElementById('loginErr');
+    loginErrEl.style.background = 'var(--aqua-bg)'; loginErrEl.style.color = 'var(--aqua-dim)';
+    loginErrEl.textContent = 'Password updated. Please sign in with your new password.';
+    loginErrEl.classList.add('show');
+  }catch(err){
+    errEl.textContent = 'Could not save password. Check your connection.';
+    errEl.classList.add('show');
+  }finally{
+    btn.disabled = false; btn.textContent = 'Save New Password';
+  }
+});
+
 /* ===== Init ===== */
 (async function init(){
   const sessionResult = await supabaseClient.auth.getSession();
-  if(sessionResult.data.session && sessionResult.data.session.user && sessionResult.data.session.user.email === ADMIN_EMAIL){
+  if(sessionResult.data.session && sessionResult.data.session.user && isAdminEmail(sessionResult.data.session.user.email)){
     currentUser = sessionResult.data.session.user;
     showApp();
   } else {
