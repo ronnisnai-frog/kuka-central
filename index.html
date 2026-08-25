@@ -316,6 +316,7 @@
           <div style="padding:0 16px 12px;">
             <div style="font-weight:700; font-size:0.95rem;" id="accountMenuName">—</div>
             <div style="font-size:0.78rem; color:var(--tide); margin-top:2px;" id="accountMenuEmail">—</div>
+            <span class="badge synced" id="accountMenuRole" style="margin-top:8px; display:inline-block;">Admin</span>
           </div>
           <div style="border-top:1px solid var(--sand-dim);"></div>
           <button class="dropdown-item" id="accountSettingsBtn"><i data-lucide="user-cog" class="lucide-icon"></i> Account Settings</button>
@@ -599,11 +600,18 @@
                 </div>
 
                 <div class="card">
-                  <h3>Team Access</h3>
-                  <p class="sub">Manage who can request access from the Users tab.</p>
+                  <h3>Team Members</h3>
+                  <p class="sub">Add someone to KUKA Central by email, and choose whether they're an Admin (full access) or a Surveyor (view-only).</p>
                   <div class="divider-fancy"><div class="dash"></div><div class="mark"></div><div class="dash"></div></div>
-                  <div class="team-member"><div class="avatar">R</div><div>ronnisnai123@gmail.com — Admin (Portal + Mobile)</div></div>
-                  <div class="team-member"><div class="avatar" style="background:var(--orange);">TM</div><div>tmatainaho@fisheries.gov.pg — Admin (Portal) <span class="badge pending" style="margin-left:6px;">Pending invite</span></div></div>
+                  <div style="display:flex; gap:10px; margin-bottom:18px;">
+                    <input type="text" id="teamNewEmail" placeholder="email@example.com" style="flex:1; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.88rem; background:var(--sand);">
+                    <select id="teamNewRole" style="padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.88rem; background:var(--sand);">
+                      <option value="admin">Admin</option>
+                      <option value="surveyor">Surveyor</option>
+                    </select>
+                    <button class="btn btn-primary" id="teamAddBtn">Add</button>
+                  </div>
+                  <div id="teamMembersList"><p class="sub">Loading…</p></div>
                 </div>
 
                 <div class="card" style="border-color:rgba(178,58,58,0.2);">
@@ -654,10 +662,6 @@
           <button class="quicklink" id="qlTable"><span><i data-lucide="table" class="lucide-icon"></i> View Table</span><span class="arrow">›</span></button>
           <button class="quicklink" id="qlMap"><span><i data-lucide="map" class="lucide-icon"></i> View Map</span><span class="arrow">›</span></button>
           <button class="quicklink" id="qlDownload"><span><i data-lucide="download" class="lucide-icon"></i> Download Data</span><span class="arrow">›</span></button>
-        </div>
-        <div class="card">
-          <h3>Team Members</h3>
-          <div class="team-member"><div class="avatar">R</div><div>Admin</div></div>
         </div>
       </div>
     </div>
@@ -942,8 +946,14 @@
 <script>
 const SUPABASE_URL = "https://spwdpzcuyrwjdhvluadu.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNwd2RwemN1eXJ3amRodmx1YWR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5OTQyOTYsImV4cCI6MjA5NjU3MDI5Nn0.xoI33qTtwT0SMxY_uJGQ0xSWE1o3Q0UgifguMyjvso8";
-const ADMIN_EMAILS = ["ronnisnai123@gmail.com", "tmatainaho@fisheries.gov.pg"];
-function isAdminEmail(email){ return ADMIN_EMAILS.includes(email); }
+let currentUserRole = null;
+async function lookupTeamRole(email){
+  try{
+    const result = await supabaseClient.from('team_members').select('role').eq('email', email).maybeSingle();
+    if(result.error || !result.data) return null;
+    return result.data.role;
+  }catch(e){ return null; }
+}
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const SURVEY_META = {
@@ -993,9 +1003,21 @@ function showApp(){
   document.getElementById('accountMenuName').textContent = fullName || 'Admin';
   document.getElementById('accountMenuEmail').textContent = currentUser.email;
   updateTopbarSurveyName();
+  applyRolePermissions();
   loadAllData();
   logActivity('Logged in');
   refreshLucideIcons();
+}
+function applyRolePermissions(){
+  const isSurveyor = currentUserRole === 'surveyor';
+  document.querySelector('#subtabs button[data-tab="users"]').style.display = isSurveyor ? 'none' : '';
+  document.querySelector('#subtabs button[data-tab="settings"]').style.display = isSurveyor ? 'none' : '';
+  document.getElementById('changeStatusBtn').style.display = isSurveyor ? 'none' : '';
+  document.getElementById('editSelectedBtn').style.display = isSurveyor ? 'none' : '';
+  document.getElementById('deleteSelectedBtn').style.display = isSurveyor ? 'none' : '';
+  document.getElementById('accountSettingsBtn').style.display = isSurveyor ? 'none' : '';
+  const roleTag = document.getElementById('accountMenuRole');
+  if(roleTag) roleTag.textContent = isSurveyor ? 'Surveyor' : 'Admin';
 }
 document.getElementById('loginBtn').addEventListener('click', async function(){
   const email = document.getElementById('loginEmail').value.trim();
@@ -1009,13 +1031,15 @@ document.getElementById('loginBtn').addEventListener('click', async function(){
   try{
     const result = await supabaseClient.auth.signInWithPassword({ email, password });
     if(result.error) throw result.error;
-    if(!isAdminEmail(result.data.user.email)){
+    const role = await lookupTeamRole(result.data.user.email);
+    if(!role){
       await supabaseClient.auth.signOut();
       errEl.textContent = 'This account does not have Portal access.';
       errEl.classList.add('show');
       return;
     }
     currentUser = result.data.user;
+    currentUserRole = role;
     showApp();
   } catch(err){
     errEl.textContent = err.message || 'Login failed. Please try again.';
@@ -2130,7 +2154,65 @@ async function loadGeneralSettings(){
       document.getElementById('genDescription').value = result.data.description;
     }
   }catch(e){ /* fall back to default description already set above */ }
+  loadTeamMembers();
 }
+
+/* ===== Team Members ===== */
+async function loadTeamMembers(){
+  const listEl = document.getElementById('teamMembersList');
+  listEl.innerHTML = '<p class="sub">Loading…</p>';
+  try{
+    const result = await supabaseClient.from('team_members').select('*').order('added_at', { ascending:true });
+    if(result.error){ listEl.innerHTML = '<p class="sub">Could not load team: '+escapeHtml(result.error.message)+'</p>'; return; }
+    const rows = result.data || [];
+    const adminCount = rows.filter(function(r){ return r.role === 'admin'; }).length;
+    listEl.innerHTML = rows.map(function(r){
+      const initials = getInitials('', r.email);
+      const isSelf = r.email === currentUser.email;
+      const canRemove = !isSelf && !(r.role === 'admin' && adminCount <= 1);
+      return '<div class="team-member" style="justify-content:space-between; display:flex; align-items:center;">'+
+        '<div style="display:flex; align-items:center; gap:10px;"><div class="avatar" style="background:'+(r.role==='admin'?'var(--mangrove-mid)':'var(--orange)')+';">'+escapeHtml(initials)+'</div>'+
+        '<div>'+escapeHtml(r.email)+(isSelf?' <span class="sub" style="font-size:0.72rem;">(you)</span>':'')+'</div></div>'+
+        '<div style="display:flex; align-items:center; gap:8px;"><span class="badge '+(r.role==='admin'?'synced':'pending')+'">'+(r.role==='admin'?'Admin':'Surveyor')+'</span>'+
+        (canRemove ? '<button class="btn-ghost" data-remove-team="'+r.email+'" style="padding:4px 9px;">✕</button>' : '')+'</div></div>';
+    }).join('');
+    listEl.querySelectorAll('[data-remove-team]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        const email = btn.dataset.removeTeam;
+        if(!confirm('Remove '+email+' from KUKA Central? They will immediately lose access.')) return;
+        try{
+          const delResult = await supabaseClient.from('team_members').delete().eq('email', email);
+          if(delResult.error){ toast('Could not remove: '+delResult.error.message); return; }
+          toast('Removed '+email);
+          logActivity('Removed team member', email);
+          loadTeamMembers();
+        }catch(err){ toast('Could not remove. Check your connection.'); }
+      });
+    });
+  }catch(err){
+    listEl.innerHTML = '<p class="sub">Could not load team. Check your connection.</p>';
+  }
+}
+document.getElementById('teamAddBtn').addEventListener('click', async function(){
+  const email = document.getElementById('teamNewEmail').value.trim().toLowerCase();
+  const role = document.getElementById('teamNewRole').value;
+  if(!email || email.indexOf('@') === -1){ toast('Enter a valid email address.'); return; }
+  const btn = document.getElementById('teamAddBtn');
+  btn.disabled = true; btn.textContent = 'Adding…';
+  try{
+    const result = await supabaseClient.from('team_members').insert({ email: email, role: role, added_by: currentUser.email });
+    if(result.error){ toast('Could not add: '+result.error.message); return; }
+    document.getElementById('teamNewEmail').value = '';
+    toast(email+' added as '+role);
+    logActivity('Added team member', email+' — '+role);
+    loadTeamMembers();
+  }catch(err){
+    toast('Could not add. Check your connection.');
+  }finally{
+    btn.disabled = false; btn.textContent = 'Add';
+  }
+});
+
 document.getElementById('genSaveBtn').addEventListener('click', async function(){
   const btn = document.getElementById('genSaveBtn');
   const desc = document.getElementById('genDescription').value.trim();
@@ -2308,12 +2390,16 @@ document.getElementById('resetPasswordSaveBtn').addEventListener('click', async 
 /* ===== Init ===== */
 (async function init(){
   const sessionResult = await supabaseClient.auth.getSession();
-  if(sessionResult.data.session && sessionResult.data.session.user && isAdminEmail(sessionResult.data.session.user.email)){
-    currentUser = sessionResult.data.session.user;
-    showApp();
-  } else {
-    showLogin();
+  if(sessionResult.data.session && sessionResult.data.session.user){
+    const role = await lookupTeamRole(sessionResult.data.session.user.email);
+    if(role){
+      currentUser = sessionResult.data.session.user;
+      currentUserRole = role;
+      showApp();
+      return;
+    }
   }
+  showLogin();
 })();
 </script>
 </body>
