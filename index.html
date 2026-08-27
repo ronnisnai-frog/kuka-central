@@ -10,19 +10,19 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
   :root{
-    --mangrove-dark:#0B4A3C;
-    --mangrove-mid:#0E5C4A;
-    --sand:#F6F3EA;
-    --sand-dim:#EFEADC;
-    --shell:#0B4A3C;
-    --shell-dim:#083D31;
+    --mangrove-dark:#006323;
+    --mangrove-mid:#065F46;
+    --sand:#F9FAF7;
+    --sand-dim:#EEF0EB;
+    --shell:#006323;
+    --shell-dim:#004D1B;
     --tide:#6B7568;
     --alert:#C0392B;
     --ink:#20261F;
     --paper:#FFFFFF;
-    --line:#E6E1D3;
-    --aqua:#2ED9A7;
-    --aqua-dim:#1FAE85;
+    --line:#E6E9E3;
+    --aqua:#10B981;
+    --aqua-dim:#0C9268;
     --aqua-bg:#DEF7EC;
     --orange:#C4622D;
     --orange-dim:#a3521f;
@@ -32,11 +32,6 @@
   html,body{margin:0;padding:0;}
   body{
     background-color:var(--sand); color:var(--ink);
-    background-image:url('./login-bg.jpg');
-    background-repeat:no-repeat;
-    background-size:cover;
-    background-position:center;
-    background-attachment:fixed;
     font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
   h1,h2,h3{ font-family:Georgia,"Times New Roman",serif; margin:0 0 4px 0; }
@@ -75,7 +70,7 @@
   #appShell{ display:none; }
   #appShell.show{ display:block; }
 
-  #topbar{ background:var(--mangrove-dark); color:var(--sand); display:flex; align-items:center; justify-content:space-between; padding:12px 22px; }
+  #topbar{ background:var(--paper); color:var(--ink); border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; padding:14px 24px; }
   #topbar .title{ display:flex; align-items:center; font-size:1.15rem; font-weight:700; font-family:Georgia,serif; flex:1; }
   #topbar .centerName{ flex:1; text-align:center; font-size:0.92rem; font-weight:600; color:#D8E4DD; font-family:Georgia,serif; }
   #topbar .right{ display:flex; align-items:center; gap:14px; flex:1; justify-content:flex-end; }
@@ -92,15 +87,22 @@
 
   #layout{ display:flex; align-items:flex-start; }
 
-  #sidebar{ width:250px; flex:none; background:var(--paper); border-right:1px solid var(--line); min-height:calc(100vh - 96px); padding:18px 0; }
+  #primarySidebar{ width:220px; flex:none; background:var(--paper); border-right:1px solid var(--line); min-height:100vh; padding:0 0 18px; }
+  .primary-nav-item{ display:flex; align-items:center; gap:10px; padding:10px 16px; margin:2px 12px; border-radius:8px; font-size:0.88rem; font-weight:600; color:var(--tide); cursor:pointer; }
+  .primary-nav-item:hover{ background:var(--sand-dim); }
+  .primary-nav-item.active{ background:var(--shell); color:#fff; }
+  .primary-nav-item .lucide-icon{ width:16px; height:16px; flex:none; }
+  .mainview-page{ padding:26px 30px; }
+  #mainview-survey{ padding:0; }
+  #sidebar{ width:220px; flex:none; background:var(--paper); border-right:1px solid var(--line); min-height:calc(100vh - 96px); padding:18px 0; }
   .sidebar-label{ padding:10px 20px 8px; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--tide); font-weight:700; }
-  .survey-item{ padding:12px 20px; font-size:0.92rem; cursor:pointer; border-left:3px solid transparent; font-weight:600; letter-spacing:0.1px; line-height:1.3; }
+  .survey-item{ padding:11px 16px; margin:2px 12px; border-radius:9px; font-size:0.92rem; cursor:pointer; font-weight:600; letter-spacing:0.1px; line-height:1.3; color:var(--tide); }
   .survey-item:hover{ background:var(--sand-dim); }
-  .survey-item.active{ background:var(--sand-dim); border-left-color:var(--shell); color:var(--shell-dim); }
+  .survey-item.active{ background:var(--shell); color:#fff; }
 
   #main{ flex:1; padding:26px 30px; display:flex; gap:22px; min-width:0; }
   #centerCol{ flex:1; min-width:0; }
-  #rightCol{ width:270px; flex:none; }
+  #rightCol{ width:230px; flex:none; }
   .page{ display:none; }
   .page.active{ display:block; }
 
@@ -305,10 +307,38 @@
 </div>
 
 <div id="appShell">
+  <div id="appBody" style="display:flex; align-items:flex-start;">
+    <aside id="primarySidebar">
+      <div class="brand" style="display:flex; align-items:center; gap:10px; padding:18px 20px 22px;">
+        <img src="./mudcrab-icon.png" class="brand-logo" style="filter:none; height:1.3em; margin:0;" alt="">
+        <span style="font-family:Georgia,serif; font-weight:700; font-size:1.1rem; color:var(--ink);">KUKA Central</span>
+      </div>
+      <div class="sidebar-label">Menu</div>
+      <div class="primary-nav-item active" data-mainview="dashboard"><i data-lucide="layout-grid" class="lucide-icon"></i> Dashboard</div>
+      <div class="primary-nav-item" data-mainview="survey"><i data-lucide="clipboard-list" class="lucide-icon"></i> Survey</div>
+      <div class="primary-nav-item" data-mainview="calendar"><i data-lucide="calendar" class="lucide-icon"></i> Calendar</div>
+      <div class="primary-nav-item" data-mainview="analytics"><i data-lucide="bar-chart-3" class="lucide-icon"></i> Analytics</div>
+      <div class="primary-nav-item" data-mainview="team"><i data-lucide="users" class="lucide-icon"></i> Team</div>
+      <div class="sidebar-label">General</div>
+      <div class="primary-nav-item" data-mainview="settings"><i data-lucide="settings" class="lucide-icon"></i> Settings</div>
+      <div class="primary-nav-item" id="primaryHelpBtn"><i data-lucide="help-circle" class="lucide-icon"></i> Help</div>
+      <div class="primary-nav-item" id="primaryLogoutBtn" style="color:var(--alert);"><i data-lucide="log-out" class="lucide-icon"></i> Logout</div>
+    </aside>
+
+    <div id="mainArea" style="flex:1; min-width:0;">
   <div id="topbar">
-    <div class="title"><img src="./mudcrab-icon.png" class="brand-logo" alt=""> KUKA Central</div>
-    <div class="centerName" id="topbarSurveyName"></div>
+    <div style="flex:1; display:flex; justify-content:center; padding:0 20px; max-width:400px;">
+      <div style="position:relative; width:100%; max-width:320px;">
+        <input type="text" id="topbarSearch" placeholder="Search submissions…" style="width:100%; padding:9px 14px 9px 34px; border-radius:8px; border:1px solid var(--line); background:var(--sand); color:var(--ink); font-size:0.85rem; font-family:inherit;">
+        <i data-lucide="search" class="lucide-icon" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); width:15px; height:15px; color:var(--tide);"></i>
+      </div>
+    </div>
+    <div id="topbarSurveyName" style="display:none;"></div>
     <div class="right">
+      <button id="notifBellBtn" style="position:relative; background:none; border:none; color:var(--ink); cursor:pointer; padding:6px;">
+        <i data-lucide="bell" class="lucide-icon"></i>
+        <span id="notifBellDot" style="display:none; position:absolute; top:4px; right:4px; width:8px; height:8px; border-radius:50%; background:var(--orange); border:1.5px solid var(--paper);"></span>
+      </button>
       <div style="position:relative;">
         <button id="avatarBtn" class="avatar" style="cursor:pointer; border:none; font-size:0.85rem;">—</button>
         <div id="accountMenu" style="display:none; position:absolute; top:46px; right:0; background:var(--paper); border:1px solid var(--line); border-radius:10px;
@@ -350,6 +380,42 @@
     </div>
   </div>
 
+  <div id="mainview-dashboard" class="mainview-page">
+    <div class="card" style="max-width:600px; margin:30px auto; text-align:center;">
+      <h2>Dashboard</h2>
+      <p class="sub">The global overview (combined stats across all surveys, chart, Team Collaboration) is coming in the next build phase.</p>
+    </div>
+  </div>
+
+  <div id="mainview-calendar" class="mainview-page" style="display:none;">
+    <div class="card" style="max-width:600px; margin:30px auto; text-align:center;">
+      <h2>Calendar</h2>
+      <p class="sub">Real team meeting tracking is coming in a later build phase.</p>
+    </div>
+  </div>
+
+  <div id="mainview-analytics" class="mainview-page" style="display:none;">
+    <div class="card" style="max-width:600px; margin:30px auto; text-align:center;">
+      <h2>Analytics</h2>
+      <p class="sub">Combined charts across all survey types are coming in a later build phase.</p>
+    </div>
+  </div>
+
+  <div id="mainview-team" class="mainview-page" style="display:none;">
+    <div class="card" style="max-width:600px; margin:30px auto; text-align:center;">
+      <h2>Team</h2>
+      <p class="sub">The card-based team view is coming in a later build phase. For now, manage team members under Survey → Settings → General.</p>
+    </div>
+  </div>
+
+  <div id="mainview-settings" class="mainview-page" style="display:none;">
+    <div class="card" style="max-width:600px; margin:30px auto; text-align:center;">
+      <h2>Settings</h2>
+      <p class="sub">The full profile/notifications/appearance page is coming in a later build phase. For now, use the avatar menu (top right) for Account Settings, Privacy Policy, and Language.</p>
+    </div>
+  </div>
+
+  <div id="mainview-survey" class="mainview-page" style="display:none;">
   <div id="subtabs">
     <button class="active" data-tab="summary">Summary</button>
     <button data-tab="users">Users</button>
@@ -666,6 +732,9 @@
       </div>
     </div>
   </div>
+  </div>
+    </div>
+  </div>
 </div>
 
 <div id="accountSettingsView" style="display:none; padding:26px 30px;">
@@ -854,6 +923,20 @@
     <div class="card">
       <h3>Account Settings</h3>
       <p class="sub">Update your profile details (name, organization, etc.) under Profile, or your password, email, and login history under Security, including the option to log out of every device at once.</p>
+    </div>
+  </div>
+</div>
+
+<div id="logoutConfirmModal" style="position:fixed; inset:0; background:rgba(27,46,40,0.5); z-index:400; display:none; align-items:center; justify-content:center; padding:24px;">
+  <div style="background:var(--paper); border-radius:14px; padding:32px; max-width:340px; width:100%; text-align:center;">
+    <div style="width:52px; height:52px; border-radius:50%; background:var(--sand-dim); display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+      <i data-lucide="log-out" class="lucide-icon" style="width:22px; height:22px; color:var(--shell);"></i>
+    </div>
+    <h3 style="margin-bottom:6px;">Logout</h3>
+    <p class="sub" style="margin-bottom:20px;">Are you sure you want to logout?</p>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-secondary" id="logoutCancelBtn" style="flex:1;">Cancel</button>
+      <button class="btn btn-primary" id="logoutConfirmBtn" style="flex:1;">Logout</button>
     </div>
   </div>
 </div>
@@ -1078,10 +1161,23 @@ document.getElementById('forgotPasswordLink').addEventListener('click', async fu
     errEl.classList.add('show');
   }
 });
-document.getElementById('logoutBtn').addEventListener('click', async function(){
+async function performLogout(){
   await supabaseClient.auth.signOut();
   currentUser = null;
   showLogin();
+}
+function showLogoutConfirm(){
+  document.getElementById('accountMenu').style.display = 'none';
+  document.getElementById('logoutConfirmModal').style.display = 'flex';
+  refreshLucideIcons();
+}
+document.getElementById('logoutBtn').addEventListener('click', function(){ showLogoutConfirm(); });
+document.getElementById('logoutCancelBtn').addEventListener('click', function(){
+  document.getElementById('logoutConfirmModal').style.display = 'none';
+});
+document.getElementById('logoutConfirmBtn').addEventListener('click', function(){
+  document.getElementById('logoutConfirmModal').style.display = 'none';
+  performLogout();
 });
 
 /* ===== Account menu dropdown ===== */
@@ -1354,6 +1450,22 @@ function goToTab(tab){
   document.querySelector('#subtabs button[data-tab="'+tab+'"]').click();
 }
 
+/* ===== Primary sidebar navigation ===== */
+function switchMainView(view){
+  document.querySelectorAll('.primary-nav-item[data-mainview]').forEach(function(el){
+    el.classList.toggle('active', el.dataset.mainview === view);
+  });
+  ['dashboard','survey','calendar','analytics','team','settings'].forEach(function(v){
+    const el = document.getElementById('mainview-'+v);
+    if(el) el.style.display = (v === view) ? 'block' : 'none';
+  });
+}
+document.querySelectorAll('.primary-nav-item[data-mainview]').forEach(function(el){
+  el.addEventListener('click', function(){ switchMainView(el.dataset.mainview); });
+});
+document.getElementById('primaryHelpBtn').addEventListener('click', function(){ openHelp(); });
+document.getElementById('primaryLogoutBtn').addEventListener('click', function(){ showLogoutConfirm(); });
+
 /* ===== Sidebar survey selection ===== */
 document.querySelectorAll('.survey-item').forEach(function(el){
   el.addEventListener('click', function(){
@@ -1549,9 +1661,30 @@ function renderSummary(){
   document.getElementById('sumSubheading').textContent = meta.desc;
   renderSummaryStats();
 }
+function updateNotifBell(){
+  const totalPending = allRows.filter(function(r){ return !r.review_status || r.review_status === 'not_reviewed' || r.review_status === 'on_hold'; }).length;
+  document.getElementById('notifBellDot').style.display = totalPending > 0 ? 'block' : 'none';
+}
+document.getElementById('notifBellBtn').addEventListener('click', function(){
+  goToTab('data');
+});
+document.getElementById('topbarSearch').addEventListener('keydown', function(e){
+  if(e.key === 'Enter'){
+    const term = this.value.trim();
+    goToTab('data');
+    showDataView('table');
+    setTimeout(function(){
+      document.getElementById('filterSearch').value = term;
+      tableCurrentPage = 0;
+      renderTable();
+    }, 60);
+  }
+});
 function renderSummaryStats(){
   const rows = rowsForSelectedType();
   const now = new Date();
+
+  updateNotifBell();
 
   // Top stat cards
   const weekMs = 7 * 24 * 60 * 60 * 1000;
