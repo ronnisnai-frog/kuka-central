@@ -171,6 +171,18 @@
   .promo-card-tasko p{ font-size:0.78rem; color:#BFE0D4; margin:0 0 14px; }
   .promo-btn-tasko{ display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.14); border:none; color:#fff; border-radius:8px; padding:10px 14px; font-size:0.8rem; margin-bottom:8px; width:100%; text-align:left; cursor:pointer; font-family:inherit; text-decoration:none; box-sizing:border-box; }
   .promo-btn-tasko:hover{ background:rgba(255,255,255,0.22); }
+  .cal-weekday{ text-align:center; font-size:0.7rem; font-weight:700; color:var(--tide); text-transform:uppercase; padding:4px 0; }
+  .cal-day{ aspect-ratio:1; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; font-size:0.85rem; font-weight:600; color:var(--ink); position:relative; }
+  .cal-day:hover{ background:var(--sand-dim); }
+  .cal-day.today{ background:var(--shell); color:#fff; }
+  .cal-day.selected:not(.today){ background:var(--sand-dim); border:1.5px solid var(--shell); }
+  .cal-day.empty{ cursor:default; }
+  .cal-day .dot{ width:5px; height:5px; border-radius:50%; background:var(--orange); position:absolute; bottom:6px; }
+  .cal-day.today .dot{ background:#fff; }
+  .cal-event-item{ padding:10px 0; border-bottom:1px solid var(--line); }
+  .cal-event-item:last-child{ border-bottom:none; }
+  .cal-event-item .t{ font-weight:700; font-size:0.86rem; }
+  .cal-event-item .s{ font-size:0.76rem; color:var(--tide); margin:2px 0 6px; }
 
   .quicklink{ display:flex; align-items:center; justify-content:space-between; padding:11px 4px; font-size:0.86rem; font-weight:600; color:var(--ink); border-bottom:1px solid var(--sand-dim); cursor:pointer; background:none; border-left:none; border-right:none; border-top:none; width:100%; text-align:left; font-family:inherit; }
   .dropdown-item{ display:flex; align-items:center; gap:10px; justify-content:flex-start; padding:11px 16px; font-size:0.86rem; font-weight:600; color:var(--ink); border:none; cursor:pointer; background:none; width:100%; text-align:left; font-family:inherit; }
@@ -471,9 +483,44 @@
   </div>
 
   <div id="mainview-calendar" class="mainview-page" style="display:none;">
-    <div class="card" style="max-width:600px; margin:30px auto; text-align:center;">
-      <h2>Calendar</h2>
-      <p class="sub">Real team meeting tracking is coming in a later build phase.</p>
+    <div style="margin-bottom:18px;">
+      <h1 style="font-size:1.5rem; margin-bottom:2px;">Calendar</h1>
+      <p class="sub" style="margin:0;">Schedule and track your team's events and meetings.</p>
+    </div>
+    <button class="btn btn-primary" id="calAddEventBtn" style="margin-bottom:18px;">+ Add Event</button>
+
+    <div class="two-col-tasko" style="align-items:flex-start;">
+      <div class="panel-tasko" style="flex:1.4;">
+        <div class="panel-head-tasko">
+          <button class="btn-ghost" id="calPrevMonthBtn">‹</button>
+          <h3 id="calMonthLabel" style="font-size:1.1rem;">—</h3>
+          <button class="btn-ghost" id="calNextMonthBtn">›</button>
+        </div>
+        <div id="calWeekdayRow" style="display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:6px;"></div>
+        <div id="calGrid" style="display:grid; grid-template-columns:repeat(7,1fr); gap:4px;"></div>
+      </div>
+      <div class="panel-tasko side" style="flex:1;">
+        <div class="panel-head-tasko"><h3 id="calEventsHeading" style="font-size:1rem;">Today's Events</h3></div>
+        <div id="calEventsList"><p class="sub">Loading…</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="calAddEventModal" style="display:none; position:fixed; inset:0; background:rgba(27,46,40,0.5); z-index:400; align-items:center; justify-content:center; padding:24px;">
+    <div style="background:var(--paper); border-radius:14px; padding:28px; max-width:380px; width:100%;">
+      <h3 style="margin-bottom:16px;">New Event</h3>
+      <label>Title</label>
+      <input type="text" id="calEventTitle" placeholder="e.g. Team Standup" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand); margin-bottom:12px;">
+      <label>Date</label>
+      <input type="date" id="calEventDate" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand); margin-bottom:12px;">
+      <label>Time</label>
+      <input type="time" id="calEventTime" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand); margin-bottom:12px;">
+      <label>Duration</label>
+      <input type="text" id="calEventDuration" placeholder="e.g. 30 min, 1 hour" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand); margin-bottom:18px;">
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-secondary" id="calCancelEventBtn" style="flex:1;">Cancel</button>
+        <button class="btn btn-primary" id="calSaveEventBtn" style="flex:1;">Save Event</button>
+      </div>
     </div>
   </div>
 
@@ -1540,6 +1587,7 @@ function switchMainView(view){
     if(el) el.style.display = (v === view) ? 'block' : 'none';
   });
   if(view === 'dashboard' && typeof allRows !== 'undefined' && allRows.length >= 0){ renderDashboard(); }
+  if(view === 'calendar' && !calLoaded){ loadCalendarEvents(); }
 }
 document.querySelectorAll('.primary-nav-item[data-mainview]').forEach(function(el){
   el.addEventListener('click', function(){ switchMainView(el.dataset.mainview); });
@@ -1893,6 +1941,142 @@ document.getElementById('openCollectBtn2').addEventListener('click', function(){
 });
 document.getElementById('dashImportBtn').addEventListener('click', function(){
   toast('Reference list import (villages/sites) is coming in a later build phase.');
+});
+
+/* ===== Calendar (Phase 3) ===== */
+let calCurrentMonth = new Date(); calCurrentMonth.setDate(1); calCurrentMonth.setHours(0,0,0,0);
+let calSelectedDate = new Date(); calSelectedDate.setHours(0,0,0,0);
+let calEvents = [];
+let calLoaded = false;
+
+async function loadCalendarEvents(){
+  document.getElementById('calEventsList').innerHTML = '<p class="sub">Loading…</p>';
+  try{
+    const result = await supabaseClient.from('team_events').select('*').order('event_date', { ascending:true }).order('event_time', { ascending:true });
+    if(result.error){
+      document.getElementById('calEventsList').innerHTML = '<p class="sub">Could not load events: '+escapeHtml(result.error.message)+'</p>';
+      calEvents = [];
+    } else {
+      calEvents = result.data || [];
+    }
+  }catch(err){
+    document.getElementById('calEventsList').innerHTML = '<p class="sub">Could not load events. Check your connection.</p>';
+    calEvents = [];
+  }
+  calLoaded = true;
+  renderCalendarGrid();
+  renderCalendarEventsList();
+}
+
+function dateKey(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+function renderCalendarGrid(){
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calMonthLabel').textContent = monthNames[calCurrentMonth.getMonth()]+' '+calCurrentMonth.getFullYear();
+
+  const weekdayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  document.getElementById('calWeekdayRow').innerHTML = weekdayNames.map(function(w){ return '<div class="cal-weekday">'+w+'</div>'; }).join('');
+
+  const firstDay = new Date(calCurrentMonth);
+  const startOffset = firstDay.getDay();
+  const daysInMonth = new Date(calCurrentMonth.getFullYear(), calCurrentMonth.getMonth()+1, 0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  const eventDateSet = new Set(calEvents.map(function(e){ return e.event_date; }));
+
+  let html = '';
+  for(let i = 0; i < startOffset; i++){ html += '<div class="cal-day empty"></div>'; }
+  for(let day = 1; day <= daysInMonth; day++){
+    const cellDate = new Date(calCurrentMonth.getFullYear(), calCurrentMonth.getMonth(), day);
+    const key = dateKey(cellDate);
+    const isToday = cellDate.getTime() === today.getTime();
+    const isSelected = cellDate.getTime() === calSelectedDate.getTime();
+    const hasEvent = eventDateSet.has(key);
+    html += '<div class="cal-day'+(isToday?' today':'')+(isSelected?' selected':'')+'" data-date="'+key+'">'+day+(hasEvent?'<span class="dot"></span>':'')+'</div>';
+  }
+  document.getElementById('calGrid').innerHTML = html;
+
+  document.querySelectorAll('.cal-day[data-date]').forEach(function(el){
+    el.addEventListener('click', function(){
+      const parts = el.dataset.date.split('-');
+      calSelectedDate = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+      renderCalendarGrid();
+      renderCalendarEventsList();
+    });
+  });
+}
+
+function renderCalendarEventsList(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const isToday = calSelectedDate.getTime() === today.getTime();
+  document.getElementById('calEventsHeading').textContent = isToday ? "Today's Events" : (monthNames[calSelectedDate.getMonth()]+' '+calSelectedDate.getDate()+' Events');
+
+  const key = dateKey(calSelectedDate);
+  const dayEvents = calEvents.filter(function(e){ return e.event_date === key; });
+  const listEl = document.getElementById('calEventsList');
+  if(dayEvents.length === 0){
+    listEl.innerHTML = '<p class="sub">No events scheduled.</p>';
+    return;
+  }
+  listEl.innerHTML = dayEvents.map(function(e){
+    return '<div class="cal-event-item"><div class="t">'+escapeHtml(e.title)+'</div>'+
+      '<div class="s">'+(e.event_time?escapeHtml(e.event_time):'')+(e.duration?' · '+escapeHtml(e.duration):'')+'</div>'+
+      '<button class="btn-ghost" data-remove-event="'+e.id+'" style="font-size:0.72rem; padding:3px 8px;">Remove</button></div>';
+  }).join('');
+  listEl.querySelectorAll('[data-remove-event]').forEach(function(btn){
+    btn.addEventListener('click', async function(){
+      if(!confirm('Remove this event?')) return;
+      try{
+        const result = await supabaseClient.from('team_events').delete().eq('id', btn.dataset.removeEvent);
+        if(result.error){ toast('Could not remove: '+result.error.message); return; }
+        toast('Event removed');
+        loadCalendarEvents();
+      }catch(err){ toast('Could not remove. Check your connection.'); }
+    });
+  });
+}
+
+document.getElementById('calPrevMonthBtn').addEventListener('click', function(){
+  calCurrentMonth.setMonth(calCurrentMonth.getMonth()-1);
+  renderCalendarGrid();
+});
+document.getElementById('calNextMonthBtn').addEventListener('click', function(){
+  calCurrentMonth.setMonth(calCurrentMonth.getMonth()+1);
+  renderCalendarGrid();
+});
+document.getElementById('calAddEventBtn').addEventListener('click', function(){
+  document.getElementById('calEventTitle').value = '';
+  document.getElementById('calEventDate').value = dateKey(calSelectedDate);
+  document.getElementById('calEventTime').value = '';
+  document.getElementById('calEventDuration').value = '';
+  document.getElementById('calAddEventModal').style.display = 'flex';
+});
+document.getElementById('calCancelEventBtn').addEventListener('click', function(){
+  document.getElementById('calAddEventModal').style.display = 'none';
+});
+document.getElementById('calSaveEventBtn').addEventListener('click', async function(){
+  const title = document.getElementById('calEventTitle').value.trim();
+  const eventDate = document.getElementById('calEventDate').value;
+  const eventTime = document.getElementById('calEventTime').value;
+  const duration = document.getElementById('calEventDuration').value.trim();
+  if(!title || !eventDate){ toast('Enter at least a title and date.'); return; }
+  const btn = document.getElementById('calSaveEventBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try{
+    const result = await supabaseClient.from('team_events').insert({ title: title, event_date: eventDate, event_time: eventTime || null, duration: duration || null, created_by: currentUser.email });
+    if(result.error){ toast('Could not save: '+result.error.message); return; }
+    document.getElementById('calAddEventModal').style.display = 'none';
+    toast('Event added');
+    logActivity('Added event', title+' — '+eventDate);
+    loadCalendarEvents();
+  }catch(err){
+    toast('Could not save. Check your connection.');
+  }finally{
+    btn.disabled = false; btn.textContent = 'Save Event';
+  }
 });
 
 function renderSummaryStats(){
