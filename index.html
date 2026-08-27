@@ -153,6 +153,10 @@
   .panel-tasko.side{ display:flex; flex-direction:column; gap:18px; }
   .panel-head-tasko{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
   .chart-foot-tasko{ display:flex; justify-content:space-between; font-size:0.76rem; color:var(--tide); margin-top:10px; padding-top:10px; border-top:1px solid var(--line); }
+  .chart-bar-wrap{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; position:relative; }
+  .chart-bar{ width:100%; border-radius:6px 6px 0 0; cursor:pointer; }
+  .chart-tooltip{ position:absolute; bottom:100%; margin-bottom:8px; background:var(--mangrove-dark); color:#fff; font-size:0.7rem; font-weight:700; padding:4px 9px; border-radius:6px; white-space:nowrap; display:none; z-index:5; }
+  .chart-bar-wrap:hover .chart-tooltip{ display:block; }
   .chart-foot-tasko b{ color:var(--aqua-dim); }
   .reminder-card-tasko{ background:var(--sand); border-radius:10px; padding:14px; }
   .reminder-card-tasko .t{ font-weight:700; font-size:0.86rem; }
@@ -375,9 +379,94 @@
   </div>
 
   <div id="mainview-dashboard" class="mainview-page">
-    <div class="card" style="max-width:600px; margin:30px auto; text-align:center;">
-      <h2>Dashboard</h2>
-      <p class="sub">The global overview (combined stats across all surveys, chart, Team Collaboration) is coming in the next build phase.</p>
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; flex-wrap:wrap; gap:14px;">
+      <div>
+        <h1 style="font-size:1.5rem; margin-bottom:2px;">Dashboard</h1>
+        <p class="sub" style="margin:0;">Plan, prioritize, and monitor all fisheries surveys at a glance.</p>
+      </div>
+      <div style="display:flex; gap:10px; position:relative;">
+        <button class="btn btn-secondary" id="dashImportBtn">Import Data</button>
+        <button class="btn btn-primary" id="dashAddProjectBtn">+ Add Project</button>
+        <div id="addProjectMenu" style="display:none; position:absolute; top:44px; right:0; background:var(--paper); border:1px solid var(--line); border-radius:10px;
+          box-shadow:0 8px 24px rgba(27,46,40,0.2); z-index:100; min-width:200px; padding:6px 0;">
+          <button class="dropdown-item" id="addFieldTripBtn"><i data-lucide="map" class="lucide-icon"></i> New Field Trip</button>
+          <button class="dropdown-item" id="addMeetingBtn"><i data-lucide="calendar-plus" class="lucide-icon"></i> New Meeting</button>
+          <button class="dropdown-item" id="openCollectBtn2"><i data-lucide="smartphone" class="lucide-icon"></i> Open KUKA Collect</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-row-tasko">
+      <div class="tstat-card hero">
+        <div class="tstat-icon"><i data-lucide="clipboard-list" class="lucide-icon"></i></div>
+        <div class="tstat-label">Total Submissions</div>
+        <div class="tstat-num" id="dashTotal">0</div>
+        <div class="tstat-foot" id="dashTotalFoot">— this week</div>
+      </div>
+      <div class="tstat-card">
+        <div class="tstat-icon aqua"><i data-lucide="check" class="lucide-icon"></i></div>
+        <div class="tstat-label">Synced</div>
+        <div class="tstat-num" id="dashSynced">0</div>
+        <div class="tstat-foot link" id="dashSyncedLink">View table ›</div>
+      </div>
+      <div class="tstat-card">
+        <div class="tstat-icon orange"><i data-lucide="hourglass" class="lucide-icon"></i></div>
+        <div class="tstat-label">Pending Review</div>
+        <div class="tstat-num" id="dashPending">0</div>
+        <div class="tstat-foot link orange-text" id="dashPendingLink">Manage status ›</div>
+      </div>
+      <div class="tstat-card">
+        <div class="tstat-icon"><i data-lucide="map-pin" class="lucide-icon"></i></div>
+        <div class="tstat-label">Provinces</div>
+        <div class="tstat-num" id="dashProvinces">0</div>
+        <div class="tstat-foot link" id="dashProvincesLink">View map ›</div>
+      </div>
+    </div>
+
+    <div class="two-col-tasko">
+      <div class="panel-tasko" style="flex:1.4;">
+        <div class="panel-head-tasko"><h3>Submissions This Week</h3><span style="font-size:0.75rem; color:var(--tide);">● All Surveys</span></div>
+        <div id="dashChartBars" style="height:150px; display:flex; align-items:flex-end; gap:10px; position:relative;"></div>
+        <div class="chart-foot-tasko"><span>Average: <b id="dashChartAvg">—</b></span><span>Peak: <b id="dashChartPeak">—</b></span></div>
+      </div>
+      <div class="panel-tasko side">
+        <div>
+          <div class="panel-head-tasko"><h3 style="font-size:1rem;">Reminders</h3></div>
+          <div class="reminder-card-tasko" id="dashReminderCard">
+            <div class="t" id="dashReminderText">All caught up</div>
+            <div class="s" id="dashReminderSub">No pending reviews right now</div>
+            <button class="btn btn-primary" style="width:100%;" id="dashReminderBtn">Review Now</button>
+          </div>
+        </div>
+        <div>
+          <div class="panel-head-tasko"><h3 style="font-size:1rem;">Review Progress</h3></div>
+          <div style="display:flex; flex-direction:column; align-items:center; padding:6px 0;">
+            <svg width="120" height="120" viewBox="0 0 130 130">
+              <circle cx="65" cy="65" r="52" fill="none" stroke="var(--sand-dim)" stroke-width="14"/>
+              <circle id="dashDonutApproved" cx="65" cy="65" r="52" fill="none" stroke="var(--aqua)" stroke-width="14" stroke-dasharray="0 327" stroke-linecap="round" transform="rotate(-90 65 65)"/>
+              <text id="dashDonutPct" x="65" y="62" text-anchor="middle" font-size="22" font-weight="700" fill="var(--mangrove-dark)" font-family="Georgia,serif">0%</text>
+              <text x="65" y="80" text-anchor="middle" font-size="9" fill="var(--tide)">Reviewed</text>
+            </svg>
+            <div style="display:flex; gap:14px; font-size:0.72rem; color:var(--tide); margin-top:8px;">
+              <span><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--aqua); margin-right:5px;"></span>Approved</span>
+              <span><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--orange); margin-right:5px;"></span>Pending</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col-tasko">
+      <div class="panel-tasko" style="flex:1.4;">
+        <div class="panel-head-tasko"><h3>Team Collaboration</h3></div>
+        <div id="dashSurveyorList"></div>
+      </div>
+      <div class="promo-card-tasko">
+        <h3>Get KUKA Collect</h3>
+        <p>Onboard a new surveyor onto the mobile field app.</p>
+        <a class="promo-btn-tasko" href="https://ronnisnai-frog.github.io/kuka-survey/" target="_blank"><i data-lucide="smartphone" class="lucide-icon"></i> Open KUKA Collect</a>
+        <button class="promo-btn-tasko" id="dashCopyInviteLinkBtn"><i data-lucide="clipboard" class="lucide-icon"></i> Copy Invite Link</button>
+      </div>
     </div>
   </div>
 
@@ -1450,6 +1539,7 @@ function switchMainView(view){
     const el = document.getElementById('mainview-'+v);
     if(el) el.style.display = (v === view) ? 'block' : 'none';
   });
+  if(view === 'dashboard' && typeof allRows !== 'undefined' && allRows.length >= 0){ renderDashboard(); }
 }
 document.querySelectorAll('.primary-nav-item[data-mainview]').forEach(function(el){
   el.addEventListener('click', function(){ switchMainView(el.dataset.mainview); });
@@ -1640,6 +1730,8 @@ async function loadAllData(){
     renderProvinceFilter();
     renderTable();
     renderMap();
+    renderDashboard();
+    updateNotifBell();
   }catch(err){
     toast('Could not load data. Check your connection.');
   }
@@ -1671,6 +1763,138 @@ document.getElementById('topbarSearch').addEventListener('keydown', function(e){
     }, 60);
   }
 });
+
+/* ===== Global Dashboard (Phase 2) ===== */
+function renderDashboard(){
+  const rows = allRows;
+  const now = new Date();
+
+  const weekMs = 7 * 24 * 60 * 60 * 1000;
+  const thisWeekCount = rows.filter(function(r){ return r.submitted_at && (now - new Date(r.submitted_at)) <= weekMs; }).length;
+  document.getElementById('dashTotal').textContent = rows.length;
+  document.getElementById('dashTotalFoot').textContent = '↗ +'+thisWeekCount+' this week';
+
+  const syncedRows = rows.filter(function(r){ return r.synced !== false; });
+  document.getElementById('dashSynced').textContent = syncedRows.length;
+
+  const pendingRows = rows.filter(function(r){ return !r.review_status || r.review_status === 'not_reviewed' || r.review_status === 'on_hold'; });
+  document.getElementById('dashPending').textContent = pendingRows.length;
+
+  const provinces = new Set(rows.map(getProvince).filter(function(p){ return p && p !== 'Unknown'; }));
+  document.getElementById('dashProvinces').textContent = provinces.size;
+
+  // Weekly chart — last 7 calendar days, all survey types combined, with hover tooltips
+  const dayLabels = ['S','M','T','W','T','F','S'];
+  const days = [];
+  for(let i = 6; i >= 0; i--){
+    const d = new Date(now); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
+    days.push(d);
+  }
+  const counts = days.map(function(day){
+    const next = new Date(day); next.setDate(next.getDate()+1);
+    return rows.filter(function(r){
+      if(!r.submitted_at) return false;
+      const t = new Date(r.submitted_at);
+      return t >= day && t < next;
+    }).length;
+  });
+  const maxCount = Math.max(1, Math.max.apply(null, counts));
+  const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const barsHtml = counts.map(function(c, i){
+    const pct = Math.round((c / maxCount) * 100);
+    const color = i === days.length-1 ? 'var(--mangrove-dark)' : (i % 2 === 0 ? 'var(--aqua)' : 'var(--mangrove-mid)');
+    return '<div class="chart-bar-wrap">'+
+      '<div class="chart-tooltip">'+c+' on '+dayNames[days[i].getDay()]+'</div>'+
+      '<div class="chart-bar" style="height:'+Math.max(pct,4)+'%; background:'+color+';"></div>'+
+      '<div style="font-size:0.68rem; color:var(--tide); margin-top:6px;">'+dayLabels[days[i].getDay()]+'</div></div>';
+  }).join('');
+  document.getElementById('dashChartBars').innerHTML = barsHtml;
+  const total7 = counts.reduce(function(a,b){return a+b;}, 0);
+  document.getElementById('dashChartAvg').textContent = (total7/7).toFixed(1)+'/day';
+  const peakIdx = counts.indexOf(Math.max.apply(null, counts));
+  document.getElementById('dashChartPeak').textContent = counts[peakIdx]+' ('+dayLabels[days[peakIdx].getDay()]+')';
+
+  // Review progress donut — all types combined
+  const approvedCount = rows.filter(function(r){ return r.review_status === 'approved'; }).length;
+  const pct = rows.length > 0 ? Math.round((approvedCount / rows.length) * 100) : 0;
+  const circumference = 2 * Math.PI * 52;
+  document.getElementById('dashDonutApproved').setAttribute('stroke-dasharray', (circumference*pct/100)+' '+circumference);
+  document.getElementById('dashDonutPct').textContent = pct+'%';
+
+  // Reminders
+  if(pendingRows.length > 0){
+    document.getElementById('dashReminderText').textContent = pendingRows.length+' submission'+(pendingRows.length===1?'':'s')+' pending review';
+    document.getElementById('dashReminderSub').textContent = 'Across all survey types — check Survey → Data';
+    document.getElementById('dashReminderBtn').style.display = 'block';
+  } else {
+    document.getElementById('dashReminderText').textContent = 'All caught up';
+    document.getElementById('dashReminderSub').textContent = 'No pending reviews right now';
+    document.getElementById('dashReminderBtn').style.display = 'none';
+  }
+
+  // Team Collaboration — all surveyors, all survey types combined
+  const bySurveyor = {};
+  rows.forEach(function(r){
+    const name = r.surveyor1 || 'Unknown';
+    if(!bySurveyor[name]) bySurveyor[name] = { synced:0, pending:0, lastSite:'', lastDate:'' };
+    if(r.synced !== false){ bySurveyor[name].synced++; } else { bySurveyor[name].pending++; }
+    if(!bySurveyor[name].lastDate || (r.survey_date && r.survey_date > bySurveyor[name].lastDate)){
+      bySurveyor[name].lastDate = r.survey_date || '';
+      bySurveyor[name].lastSite = getLabel(r);
+    }
+  });
+  const names = Object.keys(bySurveyor).sort(function(a,b){ return (bySurveyor[b].synced+bySurveyor[b].pending) - (bySurveyor[a].synced+bySurveyor[a].pending); });
+  const listEl = document.getElementById('dashSurveyorList');
+  if(names.length === 0){
+    listEl.innerHTML = '<p class="sub">No submissions yet across any survey type.</p>';
+  } else {
+    listEl.innerHTML = names.slice(0,8).map(function(name){
+      const s = bySurveyor[name];
+      const initials = getInitials(name, '');
+      const tagClass = s.pending > 0 ? 'pending' : 'approved';
+      const tagText = s.pending > 0 ? (s.pending+' pending') : (s.synced+' synced');
+      return '<div class="surveyor-row"><div class="avatar">'+escapeHtml(initials)+'</div>'+
+        '<div class="info"><div class="name">'+escapeHtml(name)+'</div><div class="sub">Last: '+escapeHtml(s.lastSite||'—')+(s.lastDate?', '+escapeHtml(s.lastDate):'')+'</div></div>'+
+        '<span class="badge '+tagClass+'">'+escapeHtml(tagText)+'</span></div>';
+    }).join('');
+  }
+  refreshLucideIcons();
+}
+document.getElementById('dashSyncedLink').addEventListener('click', function(){ switchMainView('survey'); goToTab('data'); });
+document.getElementById('dashPendingLink').addEventListener('click', function(){ switchMainView('survey'); goToTab('data'); });
+document.getElementById('dashProvincesLink').addEventListener('click', function(){ switchMainView('survey'); goToTab('data'); showDataView('map'); });
+document.getElementById('dashReminderBtn').addEventListener('click', function(){ switchMainView('survey'); goToTab('data'); });
+document.getElementById('dashCopyInviteLinkBtn').addEventListener('click', function(){
+  const url = 'https://ronnisnai-frog.github.io/kuka-survey/';
+  if(navigator.clipboard){ navigator.clipboard.writeText(url); toast('Link copied to clipboard'); }
+  else{ toast(url); }
+});
+
+/* ===== Add Project dropdown ===== */
+document.getElementById('dashAddProjectBtn').addEventListener('click', function(e){
+  e.stopPropagation();
+  const menu = document.getElementById('addProjectMenu');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+});
+document.addEventListener('click', function(e){
+  const menu = document.getElementById('addProjectMenu');
+  if(menu.style.display === 'block' && !menu.contains(e.target) && e.target.id !== 'dashAddProjectBtn'){ menu.style.display = 'none'; }
+});
+document.getElementById('addFieldTripBtn').addEventListener('click', function(){
+  document.getElementById('addProjectMenu').style.display = 'none';
+  toast('Field Trip tracking is coming in a later build phase.');
+});
+document.getElementById('addMeetingBtn').addEventListener('click', function(){
+  document.getElementById('addProjectMenu').style.display = 'none';
+  toast('Meeting scheduling is coming with the Calendar build phase.');
+});
+document.getElementById('openCollectBtn2').addEventListener('click', function(){
+  window.open('https://ronnisnai-frog.github.io/kuka-survey/', '_blank');
+});
+document.getElementById('dashImportBtn').addEventListener('click', function(){
+  toast('Reference list import (villages/sites) is coming in a later build phase.');
+});
+
 function renderSummaryStats(){
   const rows = rowsForSelectedType();
   const now = new Date();
