@@ -183,6 +183,27 @@
   .cal-event-item:last-child{ border-bottom:none; }
   .cal-event-item .t{ font-weight:700; font-size:0.86rem; }
   .cal-event-item .s{ font-size:0.76rem; color:var(--tide); margin:2px 0 6px; }
+  .settings-toggle-row{ display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--line); }
+  .settings-toggle-row:last-child{ border-bottom:none; }
+  .settings-toggle-row .t{ font-weight:700; font-size:0.88rem; }
+  .settings-toggle-row .s{ font-size:0.76rem; color:var(--tide); margin-top:2px; max-width:380px; }
+  .switch{ position:relative; display:inline-block; width:40px; height:22px; flex:none; }
+  .switch input{ opacity:0; width:0; height:0; }
+  .switch-slider{ position:absolute; cursor:pointer; inset:0; background:var(--line); border-radius:22px; transition:0.2s; }
+  .switch-slider:before{ content:''; position:absolute; height:16px; width:16px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:0.2s; }
+  .switch input:checked + .switch-slider{ background:var(--aqua); }
+  .switch input:checked + .switch-slider:before{ transform:translateX(18px); }
+  .avatar-preset{ width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:2px solid transparent; color:#fff; }
+  .avatar-preset:hover{ border-color:var(--shell); }
+  .team-card{ background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:20px; width:280px; position:relative;
+    box-shadow: 0 2px 6px rgba(27,46,40,0.06), 0 8px 18px rgba(27,46,40,0.09); }
+  .team-card-menu-btn{ position:absolute; top:16px; right:16px; background:none; border:none; color:var(--tide); cursor:pointer; font-size:1.1rem; padding:4px 8px; }
+  .team-card-menu{ display:none; position:absolute; top:44px; right:16px; background:var(--paper); border:1px solid var(--line); border-radius:8px;
+    box-shadow:0 8px 24px rgba(27,46,40,0.2); z-index:50; min-width:140px; padding:6px 0; }
+  .team-card .avatar-lg{ width:52px; height:52px; border-radius:50%; background:var(--shell); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.1rem; margin-bottom:12px; }
+  .team-card .name{ font-weight:700; font-size:0.98rem; }
+  .team-card .email{ font-size:0.78rem; color:var(--tide); margin:1px 0 10px; }
+  .team-card .status-row{ display:flex; justify-content:space-between; align-items:center; padding-top:10px; margin-top:10px; border-top:1px solid var(--line); font-size:0.78rem; color:var(--tide); }
 
   .quicklink{ display:flex; align-items:center; justify-content:space-between; padding:11px 4px; font-size:0.86rem; font-weight:600; color:var(--ink); border-bottom:1px solid var(--sand-dim); cursor:pointer; background:none; border-left:none; border-right:none; border-top:none; width:100%; text-align:left; font-family:inherit; }
   .dropdown-item{ display:flex; align-items:center; gap:10px; justify-content:flex-start; padding:11px 16px; font-size:0.86rem; font-weight:600; color:var(--ink); border:none; cursor:pointer; background:none; width:100%; text-align:left; font-family:inherit; }
@@ -349,44 +370,10 @@
         <i data-lucide="bell" class="lucide-icon"></i>
         <span id="notifBellDot" style="display:none; position:absolute; top:4px; right:4px; width:8px; height:8px; border-radius:50%; background:var(--orange); border:1.5px solid var(--paper);"></span>
       </button>
-      <div style="position:relative;">
-        <button id="avatarBtn" class="avatar" style="cursor:pointer; border:none; font-size:0.85rem;">—</button>
-        <div id="accountMenu" style="display:none; position:absolute; top:46px; right:0; background:var(--paper); border:1px solid var(--line); border-radius:10px;
-          box-shadow:0 8px 24px rgba(27,46,40,0.2); z-index:100; min-width:230px; padding:14px 0; color:var(--ink); text-align:left;">
-          <div style="padding:0 16px 12px;">
-            <div style="font-weight:700; font-size:0.95rem;" id="accountMenuName">—</div>
-            <div style="font-size:0.78rem; color:var(--tide); margin-top:2px;" id="accountMenuEmail">—</div>
-            <span class="badge synced" id="accountMenuRole" style="margin-top:8px; display:inline-block;">Admin</span>
-          </div>
-          <div style="border-top:1px solid var(--sand-dim);"></div>
-          <button class="dropdown-item" id="accountSettingsBtn"><i data-lucide="user-cog" class="lucide-icon"></i> Account Settings</button>
-          <div style="border-top:1px solid var(--sand-dim);"></div>
-          <button class="dropdown-item" id="privacyPolicyBtn"><i data-lucide="shield-check" class="lucide-icon"></i> Data &amp; Privacy Policy</button>
-          <div style="border-top:1px solid var(--sand-dim);"></div>
-          <button class="dropdown-item" id="helpBtn"><i data-lucide="help-circle" class="lucide-icon"></i> Help</button>
-          <div style="border-top:1px solid var(--sand-dim);"></div>
-          <div style="padding:10px 16px 4px;">
-            <label style="display:flex; align-items:center; gap:8px; font-size:0.86rem; font-weight:600; cursor:pointer;">
-              <i data-lucide="languages" class="lucide-icon"></i> Language
-            </label>
-            <select id="languageSelect" style="width:100%; margin-top:8px; padding:8px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.85rem; background:var(--sand);">
-              <option value="en" selected>English</option>
-              <option value="es">Spanish</option>
-              <option value="fr">French</option>
-              <option value="pt">Portuguese</option>
-              <option value="de">German</option>
-              <option value="ar">Arabic</option>
-              <option value="zh">Chinese (Simplified)</option>
-              <option value="hi">Hindi</option>
-              <option value="ru">Russian</option>
-              <option value="ja">Japanese</option>
-            </select>
-            <p style="font-size:0.7rem; color:var(--tide); margin:6px 0 0;">Translates the menu and screen titles. Data stays in English.</p>
-          </div>
-          <div style="border-top:1px solid var(--sand-dim); margin-top:10px;"></div>
-          <button class="dropdown-item" id="logoutBtn" style="color:var(--alert); font-weight:700;"><i data-lucide="log-out" class="lucide-icon"></i> Log Out</button>
-        </div>
-      </div>
+      <button id="avatarBtn" class="avatar" style="cursor:pointer; border:none; font-size:0.85rem; overflow:hidden; padding:0;">
+        <img id="topbarAvatarImg" src="" alt="" style="width:100%; height:100%; object-fit:cover; display:none;">
+        <span id="topbarAvatarInitials">—</span>
+      </button>
     </div>
   </div>
 
@@ -532,18 +519,300 @@
   </div>
 
   <div id="mainview-team" class="mainview-page" style="display:none;">
-    <div class="card" style="max-width:600px; margin:30px auto; text-align:center;">
-      <h2>Team</h2>
-      <p class="sub">The card-based team view is coming in a later build phase. For now, manage team members under Survey → Settings → General.</p>
+    <div style="margin-bottom:18px;">
+      <h1 style="font-size:1.5rem; margin-bottom:2px;">Team</h1>
+      <p class="sub" style="margin:0;">Manage your team members and their roles.</p>
+    </div>
+    <button class="btn btn-primary" id="teamCardAddBtn" style="margin-bottom:18px;">+ Add Member</button>
+    <div id="teamCardsGrid" style="display:flex; flex-wrap:wrap; gap:18px;"><p class="sub">Loading…</p></div>
+  </div>
+
+  <div id="teamAddModal" style="display:none; position:fixed; inset:0; background:rgba(27,46,40,0.5); z-index:400; align-items:center; justify-content:center; padding:24px;">
+    <div style="background:var(--paper); border-radius:14px; padding:28px; max-width:380px; width:100%;">
+      <h3 style="margin-bottom:16px;">Add Team Member</h3>
+      <label>Full Name</label>
+      <input type="text" id="teamModalName" placeholder="e.g. Nathan Tony" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand); margin-bottom:6px;">
+      <p style="font-size:0.72rem; color:var(--tide); margin:0 0 12px;">Use the exact name they use in KUKA Collect, so their submission count matches correctly.</p>
+      <label>Email</label>
+      <input type="text" id="teamModalEmail" placeholder="email@example.com" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand); margin-bottom:12px;">
+      <label>Role</label>
+      <select id="teamModalRole" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand); margin-bottom:18px;">
+        <option value="admin">Admin</option>
+        <option value="surveyor">Surveyor</option>
+      </select>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-secondary" id="teamModalCancelBtn" style="flex:1;">Cancel</button>
+        <button class="btn btn-primary" id="teamModalSaveBtn" style="flex:1;">Add</button>
+      </div>
     </div>
   </div>
 
   <div id="mainview-settings" class="mainview-page" style="display:none;">
-    <div class="card" style="max-width:600px; margin:30px auto; text-align:center;">
-      <h2>Settings</h2>
-      <p class="sub">The full profile/notifications/appearance page is coming in a later build phase. For now, use the avatar menu (top right) for Account Settings, Privacy Policy, and Language.</p>
+    <div style="margin-bottom:18px;">
+      <h1 style="font-size:1.5rem; margin-bottom:2px;">Settings</h1>
+      <p class="sub" style="margin:0;">Manage your account preferences and application settings.</p>
+    </div>
+
+    <div class="card" style="max-width:600px;">
+      <h3>Profile Information</h3>
+      <div style="display:flex; align-items:center; gap:16px; margin:16px 0;">
+        <button id="settingsAvatarBtn" style="width:64px; height:64px; border-radius:50%; border:none; padding:0; cursor:pointer; overflow:hidden; background:var(--sand-dim); display:flex; align-items:center; justify-content:center;">
+          <img id="settingsAvatarImg" src="" alt="" style="width:100%; height:100%; object-fit:cover; display:none;">
+          <i data-lucide="user-round" class="lucide-icon" id="settingsAvatarDefaultIcon" style="width:32px; height:32px; color:var(--tide);"></i>
+        </button>
+        <div>
+          <button class="btn btn-secondary" id="settingsChangePhotoBtn">Change Photo</button>
+          <p style="font-size:0.72rem; color:var(--tide); margin:6px 0 0;">JPG, PNG. Max size 2MB.</p>
+        </div>
+      </div>
+      <label class="first">Full Name</label>
+      <input type="text" id="settingsFullName" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand); margin-bottom:12px;">
+      <label>Email</label>
+      <input type="text" id="settingsEmail" disabled style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand-dim); color:var(--tide); margin-bottom:16px;">
+      <button class="btn btn-primary" id="settingsSaveProfileBtn">Save Changes</button>
+    </div>
+
+    <div class="card" style="max-width:600px;">
+      <h3>Notifications</h3>
+      <p class="sub" style="margin-bottom:14px;">These are saved preferences — KUKA Central doesn't send automated notifications yet, so toggling these won't trigger anything until that's built.</p>
+      <div class="settings-toggle-row"><div><div class="t">Email notifications</div><div class="s">Receive email about your account activity</div></div><label class="switch"><input type="checkbox" id="notifEmailToggle"><span class="switch-slider"></span></label></div>
+      <div class="settings-toggle-row"><div><div class="t">Push notifications</div><div class="s">Receive push notifications in your browser</div></div><label class="switch"><input type="checkbox" id="notifPushToggle"><span class="switch-slider"></span></label></div>
+    </div>
+
+    <div class="card" style="max-width:600px;">
+      <h3>Appearance</h3>
+      <div class="settings-toggle-row"><div><div class="t">Dark Mode</div><div class="s">A dark theme isn't built yet — this just saves your preference for when it is.</div></div><label class="switch"><input type="checkbox" id="darkModeToggle"><span class="switch-slider"></span></label></div>
+    </div>
+
+    <div class="card" style="max-width:600px;">
+      <h3>Data &amp; Privacy</h3>
+      <p class="sub" style="margin-bottom:14px;">Review what data KUKA collects and why.</p>
+      <button class="btn btn-secondary" id="settingsPrivacyBtn">View Privacy Policy</button>
+    </div>
+
+    <div class="card" style="max-width:600px;">
+      <h3>Language</h3>
+      <select id="settingsLanguageSelect" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
+        <option value="en" selected>English</option>
+        <option value="es">Spanish</option>
+        <option value="fr">French</option>
+        <option value="pt">Portuguese</option>
+        <option value="de">German</option>
+        <option value="ar">Arabic</option>
+        <option value="zh">Chinese (Simplified)</option>
+        <option value="hi">Hindi</option>
+        <option value="ru">Russian</option>
+        <option value="ja">Japanese</option>
+      </select>
+      <p style="font-size:0.72rem; color:var(--tide); margin:8px 0 0;">Translates the menu and screen titles. Data stays in English.</p>
+    </div>
+
+    <div class="card" style="max-width:600px;">
+      <h3>Advanced</h3>
+      <p class="sub" style="margin-bottom:14px;">Organization info, password, email, login history, and log-out-of-all-devices.</p>
+      <button class="btn btn-secondary" id="settingsGoToAccountBtn">Account Settings →</button>
     </div>
   </div>
+
+  <div id="avatarPickerModal" style="display:none; position:fixed; inset:0; background:rgba(27,46,40,0.5); z-index:400; align-items:center; justify-content:center; padding:24px;">
+    <div style="background:var(--paper); border-radius:14px; padding:28px; max-width:380px; width:100%;">
+      <h3 style="margin-bottom:16px;">Choose an Avatar</h3>
+      <div id="avatarPresetGrid" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px;"></div>
+      <input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
+      <button class="btn btn-primary" id="avatarUploadBtn" style="width:100%; margin-bottom:10px;">Choose Photo from Device</button>
+      <button class="btn btn-secondary" id="avatarPickerCloseBtn" style="width:100%;">Cancel</button>
+    </div>
+  </div>
+
+<div id="mainview-accountsettings" class="mainview-page" style="display:none;">
+  <button id="accountSettingsBack" class="btn-ghost" style="margin-bottom:18px;"><i data-lucide="arrow-left" class="lucide-icon"></i> Back to Dashboard</button>
+  <div style="display:flex; gap:22px; align-items:flex-start; max-width:900px;">
+    <div class="mini-nav-card" style="width:150px; flex:none;">
+      <button class="settings-subnav-item active" data-acctab="profile"><i data-lucide="user" class="lucide-icon"></i> Profile</button>
+      <button class="settings-subnav-item" data-acctab="security"><i data-lucide="lock" class="lucide-icon"></i> Security</button>
+    </div>
+
+    <div style="flex:1; min-width:0;">
+      <div class="acc-page active" id="acc-profile">
+        <div class="toolbar" style="margin-bottom:18px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="avatar" id="profileAvatar" style="width:42px; height:42px; font-size:1rem;">—</div>
+            <div style="font-weight:700; font-size:1rem;" id="profileUsername">—</div>
+          </div>
+          <button class="btn btn-primary" id="profileSaveBtn">Save Changes</button>
+        </div>
+
+        <div class="card">
+          <label class="first" style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Full Name *</label>
+          <input type="text" id="profFullName" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand); margin-bottom:16px;">
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div>
+              <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Country *</label>
+              <select id="profCountry" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
+                <option>Papua New Guinea</option>
+                <option>Fiji</option>
+                <option>Solomon Islands</option>
+                <option>Vanuatu</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">City</label>
+              <input type="text" id="profCity" placeholder="e.g. Port Moresby" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div>
+              <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Sector *</label>
+              <select id="profSector" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
+                <option>Fisheries</option>
+                <option>Environment</option>
+                <option>Government</option>
+                <option>Research / Academia</option>
+                <option>NGO</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Organization Type *</label>
+              <select id="profOrgType" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
+                <option>Government Institution</option>
+                <option>Non-Governmental Organization</option>
+                <option>Academic / Research Institution</option>
+                <option>Private Sector</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+
+          <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Organization Name *</label>
+          <input type="text" id="profOrgName" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand); margin-bottom:16px;">
+
+          <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Organization Website</label>
+          <input type="text" id="profOrgWebsite" placeholder="https://…" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand); margin-bottom:16px;">
+
+          <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Bio</label>
+          <input type="text" id="profBio" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
+        </div>
+
+        <div class="card" style="border-color:rgba(178,58,58,0.2); margin-top:20px;">
+          <h3 style="color:var(--alert); margin-bottom:6px;">Delete Account</h3>
+          <p class="sub">Account deletion for KUKA administrators must be handled directly in Supabase, since it affects login access for every surveyor. Contact your database administrator to proceed.</p>
+          <button class="btn" id="profDeleteBtn" style="background:none; color:var(--alert); border:1.5px solid var(--alert); margin-top:8px;">Delete Account</button>
+        </div>
+      </div>
+
+      <div class="acc-page" id="acc-security" style="display:none;">
+        <div class="card">
+          <h3 style="margin-bottom:14px;">Password</h3>
+          <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">New Password</label>
+          <div style="display:flex; gap:10px;">
+            <input type="password" id="secNewPassword" placeholder="At least 6 characters" style="flex:1; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
+            <button class="btn btn-primary" id="secPasswordBtn">Update</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom:14px;">Email Address</h3>
+          <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Email</label>
+          <div style="display:flex; gap:10px;">
+            <input type="text" id="secNewEmail" style="flex:1; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
+            <button class="btn btn-primary" id="secEmailBtn">Change</button>
+          </div>
+          <p class="sub" style="margin-top:8px; font-size:0.76rem;">A confirmation link will be sent to the new address before the change takes effect.</p>
+        </div>
+
+        <div class="card">
+          <div class="toolbar" style="margin-bottom:14px;">
+            <h3 style="margin:0;">Recent Account Activity</h3>
+            <div class="actions">
+              <button class="btn-ghost" id="secLogoutAllBtn"><i data-lucide="log-out" class="lucide-icon"></i> Log Out of All Devices</button>
+              <button class="btn btn-secondary" id="secExportLogBtn"><i data-lucide="download" class="lucide-icon"></i> Export Log Data</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Action</th><th>Last Activity</th></tr></thead>
+              <tbody id="secActivityBody"><tr><td colspan="2" style="padding:18px;">Loading…</td></tr></tbody>
+            </table>
+          </div>
+          <div class="toolbar" style="margin-top:12px;">
+            <span style="font-size:0.8rem; color:var(--tide);" id="secActivityPageLabel">Page 1</span>
+            <div class="actions">
+              <button class="btn-ghost" id="secActivityPrevBtn">‹ Prev</button>
+              <button class="btn-ghost" id="secActivityNextBtn">Next ›</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="mainview-helpdetail" class="mainview-page" style="display:none;">
+  <button id="helpBack" class="btn-ghost" style="margin-bottom:18px;"><i data-lucide="arrow-left" class="lucide-icon"></i> Back to Dashboard</button>
+  <div style="max-width:640px;">
+    <h2 style="margin-bottom:4px;">Help &amp; Guide</h2>
+    <p class="sub" style="margin-bottom:20px;">An overview of what each part of KUKA Central does.</p>
+
+    <div class="card">
+      <h3>Survey List</h3>
+      <p class="sub">The left sidebar lists the three survey types — Mud Crab, Coconut Crab Socio-economic, and Coconut Crab Biological. Selecting one scopes everything else on screen — Summary, Data, and Settings — to just that survey type.</p>
+    </div>
+
+    <div class="card">
+      <h3>Summary Tab</h3>
+      <p class="sub">Shows the selected survey's description, question count, region, and category, plus a Submissions card with counts over 7/31/90/365 days and a running total.</p>
+    </div>
+
+    <div class="card">
+      <h3>Users Tab</h3>
+      <p class="sub">Lists everyone who has requested or been granted access to KUKA Collect, with their approval status and request date.</p>
+    </div>
+
+    <div class="card">
+      <h3>Data → Table</h3>
+      <p class="sub">A full spreadsheet-style view of every submission, one row per survey. Search and filter by province, hide columns you don't need, and select rows to bulk Change Status, Edit top-level fields, Delete, or Export to Excel.</p>
+    </div>
+
+    <div class="card">
+      <h3>Data → Reports</h3>
+      <p class="sub">An automatic frequency breakdown for every field — how many submissions answered it, and the most common values — useful for a quick sense of your data without opening Excel.</p>
+    </div>
+
+    <div class="card">
+      <h3>Data → Gallery</h3>
+      <p class="sub">Every specimen photo captured in the field (Mud Crab and Biological surveys only), labeled with survey ID and date, sortable and filterable by date range. Click any photo to view it full-size.</p>
+    </div>
+
+    <div class="card">
+      <h3>Data → Map</h3>
+      <p class="sub">Plots every GPS-tagged submission for the selected survey type. Markers are color-coded by survey type — orange for Mud Crab, purple for Socio-economic, dark teal for Biological.</p>
+    </div>
+
+    <div class="card">
+      <h3>Change Status</h3>
+      <p class="sub">A review workflow separate from sync status — mark submissions as Approved, Not Approved, On-Hold, or Not Reviewed to track your own data quality checks.</p>
+    </div>
+
+    <div class="card">
+      <h3>Settings → General</h3>
+      <p class="sub">Edit the description shown on a survey's Summary tab. The Danger Zone here permanently deletes all data for the currently selected survey type — export a backup first if there's any chance you'll need it.</p>
+    </div>
+
+    <div class="card">
+      <h3>Settings → Activity</h3>
+      <p class="sub">A real audit log of admin actions — logins, exports, deletions, and description changes — with filtering and pagination.</p>
+    </div>
+
+    <div class="card">
+      <h3>Account Settings</h3>
+      <p class="sub">Update your profile details (name, organization, etc.) under Profile, or your password, email, and login history under Security, including the option to log out of every device at once.</p>
+    </div>
+  </div>
+</div>
 
   <div id="mainview-survey" class="mainview-page" style="display:none;">
   <div id="subtabs">
@@ -797,17 +1066,8 @@
 
                 <div class="card">
                   <h3>Team Members</h3>
-                  <p class="sub">Add someone to KUKA Central by email, and choose whether they're an Admin (full access) or a Surveyor (view-only).</p>
-                  <div class="divider-fancy"><div class="dash"></div><div class="mark"></div><div class="dash"></div></div>
-                  <div style="display:flex; gap:10px; margin-bottom:18px;">
-                    <input type="text" id="teamNewEmail" placeholder="email@example.com" style="flex:1; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.88rem; background:var(--sand);">
-                    <select id="teamNewRole" style="padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.88rem; background:var(--sand);">
-                      <option value="admin">Admin</option>
-                      <option value="surveyor">Surveyor</option>
-                    </select>
-                    <button class="btn btn-primary" id="teamAddBtn">Add</button>
-                  </div>
-                  <div id="teamMembersList"><p class="sub">Loading…</p></div>
+                  <p class="sub">Team member management has moved to its own page, with a fuller view of activity and submissions per person.</p>
+                  <button class="btn btn-primary" id="genGoToTeamBtn">Go to Team Page →</button>
                 </div>
 
                 <div class="card" style="border-color:rgba(178,58,58,0.2);">
@@ -867,195 +1127,6 @@
   </div>
 </div>
 
-<div id="accountSettingsView" style="display:none; padding:26px 30px;">
-  <button id="accountSettingsBack" class="btn-ghost" style="margin-bottom:18px;"><i data-lucide="arrow-left" class="lucide-icon"></i> Back to Dashboard</button>
-  <div style="display:flex; gap:22px; align-items:flex-start; max-width:900px;">
-    <div class="mini-nav-card" style="width:150px; flex:none;">
-      <button class="settings-subnav-item active" data-acctab="profile"><i data-lucide="user" class="lucide-icon"></i> Profile</button>
-      <button class="settings-subnav-item" data-acctab="security"><i data-lucide="lock" class="lucide-icon"></i> Security</button>
-    </div>
-
-    <div style="flex:1; min-width:0;">
-      <div class="acc-page active" id="acc-profile">
-        <div class="toolbar" style="margin-bottom:18px;">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div class="avatar" id="profileAvatar" style="width:42px; height:42px; font-size:1rem;">—</div>
-            <div style="font-weight:700; font-size:1rem;" id="profileUsername">—</div>
-          </div>
-          <button class="btn btn-primary" id="profileSaveBtn">Save Changes</button>
-        </div>
-
-        <div class="card">
-          <label class="first" style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Full Name *</label>
-          <input type="text" id="profFullName" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand); margin-bottom:16px;">
-
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
-            <div>
-              <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Country *</label>
-              <select id="profCountry" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
-                <option>Papua New Guinea</option>
-                <option>Fiji</option>
-                <option>Solomon Islands</option>
-                <option>Vanuatu</option>
-                <option>Other</option>
-              </select>
-            </div>
-            <div>
-              <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">City</label>
-              <input type="text" id="profCity" placeholder="e.g. Port Moresby" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
-            </div>
-          </div>
-
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
-            <div>
-              <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Sector *</label>
-              <select id="profSector" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
-                <option>Fisheries</option>
-                <option>Environment</option>
-                <option>Government</option>
-                <option>Research / Academia</option>
-                <option>NGO</option>
-                <option>Other</option>
-              </select>
-            </div>
-            <div>
-              <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Organization Type *</label>
-              <select id="profOrgType" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
-                <option>Government Institution</option>
-                <option>Non-Governmental Organization</option>
-                <option>Academic / Research Institution</option>
-                <option>Private Sector</option>
-                <option>Other</option>
-              </select>
-            </div>
-          </div>
-
-          <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Organization Name *</label>
-          <input type="text" id="profOrgName" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand); margin-bottom:16px;">
-
-          <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Organization Website</label>
-          <input type="text" id="profOrgWebsite" placeholder="https://…" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand); margin-bottom:16px;">
-
-          <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Bio</label>
-          <input type="text" id="profBio" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
-        </div>
-
-        <div class="card" style="border-color:rgba(178,58,58,0.2); margin-top:20px;">
-          <h3 style="color:var(--alert); margin-bottom:6px;">Delete Account</h3>
-          <p class="sub">Account deletion for KUKA administrators must be handled directly in Supabase, since it affects login access for every surveyor. Contact your database administrator to proceed.</p>
-          <button class="btn" id="profDeleteBtn" style="background:none; color:var(--alert); border:1.5px solid var(--alert); margin-top:8px;">Delete Account</button>
-        </div>
-      </div>
-
-      <div class="acc-page" id="acc-security" style="display:none;">
-        <div class="card">
-          <h3 style="margin-bottom:14px;">Password</h3>
-          <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">New Password</label>
-          <div style="display:flex; gap:10px;">
-            <input type="password" id="secNewPassword" placeholder="At least 6 characters" style="flex:1; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
-            <button class="btn btn-primary" id="secPasswordBtn">Update</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3 style="margin-bottom:14px;">Email Address</h3>
-          <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Email</label>
-          <div style="display:flex; gap:10px;">
-            <input type="text" id="secNewEmail" style="flex:1; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand);">
-            <button class="btn btn-primary" id="secEmailBtn">Change</button>
-          </div>
-          <p class="sub" style="margin-top:8px; font-size:0.76rem;">A confirmation link will be sent to the new address before the change takes effect.</p>
-        </div>
-
-        <div class="card">
-          <div class="toolbar" style="margin-bottom:14px;">
-            <h3 style="margin:0;">Recent Account Activity</h3>
-            <div class="actions">
-              <button class="btn-ghost" id="secLogoutAllBtn"><i data-lucide="log-out" class="lucide-icon"></i> Log Out of All Devices</button>
-              <button class="btn btn-secondary" id="secExportLogBtn"><i data-lucide="download" class="lucide-icon"></i> Export Log Data</button>
-            </div>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Action</th><th>Last Activity</th></tr></thead>
-              <tbody id="secActivityBody"><tr><td colspan="2" style="padding:18px;">Loading…</td></tr></tbody>
-            </table>
-          </div>
-          <div class="toolbar" style="margin-top:12px;">
-            <span style="font-size:0.8rem; color:var(--tide);" id="secActivityPageLabel">Page 1</span>
-            <div class="actions">
-              <button class="btn-ghost" id="secActivityPrevBtn">‹ Prev</button>
-              <button class="btn-ghost" id="secActivityNextBtn">Next ›</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="helpView" style="display:none; padding:26px 30px;">
-  <button id="helpBack" class="btn-ghost" style="margin-bottom:18px;"><i data-lucide="arrow-left" class="lucide-icon"></i> Back to Dashboard</button>
-  <div style="max-width:640px;">
-    <h2 style="margin-bottom:4px;">Help &amp; Guide</h2>
-    <p class="sub" style="margin-bottom:20px;">An overview of what each part of KUKA Central does.</p>
-
-    <div class="card">
-      <h3>Survey List</h3>
-      <p class="sub">The left sidebar lists the three survey types — Mud Crab, Coconut Crab Socio-economic, and Coconut Crab Biological. Selecting one scopes everything else on screen — Summary, Data, and Settings — to just that survey type.</p>
-    </div>
-
-    <div class="card">
-      <h3>Summary Tab</h3>
-      <p class="sub">Shows the selected survey's description, question count, region, and category, plus a Submissions card with counts over 7/31/90/365 days and a running total.</p>
-    </div>
-
-    <div class="card">
-      <h3>Users Tab</h3>
-      <p class="sub">Lists everyone who has requested or been granted access to KUKA Collect, with their approval status and request date.</p>
-    </div>
-
-    <div class="card">
-      <h3>Data → Table</h3>
-      <p class="sub">A full spreadsheet-style view of every submission, one row per survey. Search and filter by province, hide columns you don't need, and select rows to bulk Change Status, Edit top-level fields, Delete, or Export to Excel.</p>
-    </div>
-
-    <div class="card">
-      <h3>Data → Reports</h3>
-      <p class="sub">An automatic frequency breakdown for every field — how many submissions answered it, and the most common values — useful for a quick sense of your data without opening Excel.</p>
-    </div>
-
-    <div class="card">
-      <h3>Data → Gallery</h3>
-      <p class="sub">Every specimen photo captured in the field (Mud Crab and Biological surveys only), labeled with survey ID and date, sortable and filterable by date range. Click any photo to view it full-size.</p>
-    </div>
-
-    <div class="card">
-      <h3>Data → Map</h3>
-      <p class="sub">Plots every GPS-tagged submission for the selected survey type. Markers are color-coded by survey type — orange for Mud Crab, purple for Socio-economic, dark teal for Biological.</p>
-    </div>
-
-    <div class="card">
-      <h3>Change Status</h3>
-      <p class="sub">A review workflow separate from sync status — mark submissions as Approved, Not Approved, On-Hold, or Not Reviewed to track your own data quality checks.</p>
-    </div>
-
-    <div class="card">
-      <h3>Settings → General</h3>
-      <p class="sub">Edit the description shown on a survey's Summary tab. The Danger Zone here permanently deletes all data for the currently selected survey type — export a backup first if there's any chance you'll need it.</p>
-    </div>
-
-    <div class="card">
-      <h3>Settings → Activity</h3>
-      <p class="sub">A real audit log of admin actions — logins, exports, deletions, and description changes — with filtering and pagination.</p>
-    </div>
-
-    <div class="card">
-      <h3>Account Settings</h3>
-      <p class="sub">Update your profile details (name, organization, etc.) under Profile, or your password, email, and login history under Security, including the option to log out of every device at once.</p>
-    </div>
-  </div>
-</div>
 
 <div id="logoutConfirmModal" style="position:fixed; inset:0; background:rgba(27,46,40,0.5); z-index:400; display:none; align-items:center; justify-content:center; padding:24px;">
   <div style="background:var(--paper); border-radius:14px; padding:32px; max-width:340px; width:100%; text-align:center;">
@@ -1209,16 +1280,175 @@ function getInitials(name, email){
 function showApp(){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appShell').classList.add('show');
-  const fullName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || '';
-  document.getElementById('avatarBtn').textContent = getInitials(fullName, currentUser.email);
-  document.getElementById('accountMenuName').textContent = fullName || 'Admin';
-  document.getElementById('accountMenuEmail').textContent = currentUser.email;
+  updateAvatarDisplay();
   updateTopbarSurveyName();
   applyRolePermissions();
   loadAllData();
   logActivity('Logged in');
   refreshLucideIcons();
 }
+const AVATAR_PRESETS = [
+  { bg:'#006323', icon:'fish' },
+  { bg:'#3B82F6', icon:'anchor' },
+  { bg:'#C4622D', icon:'compass' },
+  { bg:'#8B5CF6', icon:'shell' },
+  { bg:'#0C9268', icon:'waves' },
+  { bg:'#DC2626', icon:'map-pin' }
+];
+function updateAvatarDisplay(){
+  const meta = (currentUser && currentUser.user_metadata) || {};
+  const fullName = meta.full_name || '';
+  const initials = getInitials(fullName, currentUser ? currentUser.email : '');
+  const avatarData = meta.avatar_data || '';
+  const isPhoto = avatarData.indexOf('data:') === 0;
+  const isPreset = avatarData.indexOf('preset:') === 0;
+  const presetIdx = isPreset ? parseInt(avatarData.split(':')[1]) : -1;
+  const preset = (isPreset && AVATAR_PRESETS[presetIdx]) ? AVATAR_PRESETS[presetIdx] : null;
+
+  ['topbarAvatarImg'].forEach(function(imgId){
+    const img = document.getElementById(imgId);
+    if(!img) return;
+    if(isPhoto){ img.src = avatarData; img.style.display = 'block'; } else { img.style.display = 'none'; }
+  });
+  const initialsEl = document.getElementById('topbarAvatarInitials');
+  const avatarBtn = document.getElementById('avatarBtn');
+  if(initialsEl && avatarBtn){
+    if(preset){
+      initialsEl.innerHTML = '<i data-lucide="'+preset.icon+'" class="lucide-icon" style="width:16px; height:16px;"></i>';
+      initialsEl.style.display = 'inline-flex';
+      avatarBtn.style.background = preset.bg;
+    } else if(isPhoto){
+      initialsEl.style.display = 'none';
+      avatarBtn.style.background = '';
+    } else {
+      initialsEl.textContent = initials;
+      initialsEl.style.display = 'inline';
+      avatarBtn.style.background = '';
+    }
+    refreshLucideIcons();
+  }
+
+  const settingsImg = document.getElementById('settingsAvatarImg');
+  const settingsIcon = document.getElementById('settingsAvatarDefaultIcon');
+  const settingsBtn = document.getElementById('settingsAvatarBtn');
+  if(settingsImg && settingsIcon && settingsBtn){
+    if(isPhoto){
+      settingsImg.src = avatarData; settingsImg.style.display = 'block'; settingsIcon.style.display = 'none'; settingsBtn.style.background = 'var(--sand-dim)';
+    } else if(preset){
+      settingsImg.style.display = 'none';
+      settingsIcon.setAttribute('data-lucide', preset.icon);
+      settingsIcon.style.display = 'block'; settingsIcon.style.color = '#fff';
+      settingsBtn.style.background = preset.bg;
+    } else {
+      settingsImg.style.display = 'none'; settingsIcon.setAttribute('data-lucide','user-round'); settingsIcon.style.display = 'block'; settingsIcon.style.color = 'var(--tide)';
+      settingsBtn.style.background = 'var(--sand-dim)';
+    }
+    refreshLucideIcons();
+  }
+}
+function renderAvatarPresetGrid(){
+  const grid = document.getElementById('avatarPresetGrid');
+  grid.innerHTML = AVATAR_PRESETS.map(function(p, i){
+    return '<button type="button" class="avatar-preset" data-preset-idx="'+i+'" style="background:'+p.bg+';"><i data-lucide="'+p.icon+'" class="lucide-icon" style="width:22px; height:22px;"></i></button>';
+  }).join('');
+  grid.querySelectorAll('[data-preset-idx]').forEach(function(btn){
+    btn.addEventListener('click', async function(){
+      const idx = btn.dataset.presetIdx;
+      try{
+        const result = await supabaseClient.auth.updateUser({ data: { avatar_data: 'preset:'+idx } });
+        if(result.error){ toast('Could not save avatar: '+result.error.message); return; }
+        currentUser = result.data.user;
+        updateAvatarDisplay();
+        document.getElementById('avatarPickerModal').style.display = 'none';
+        toast('Avatar updated');
+      }catch(err){ toast('Could not save avatar. Check your connection.'); }
+    });
+  });
+  refreshLucideIcons();
+}
+function openAvatarPicker(){
+  renderAvatarPresetGrid();
+  document.getElementById('avatarPickerModal').style.display = 'flex';
+}
+document.getElementById('settingsAvatarBtn').addEventListener('click', openAvatarPicker);
+document.getElementById('settingsChangePhotoBtn').addEventListener('click', openAvatarPicker);
+document.getElementById('avatarPickerCloseBtn').addEventListener('click', function(){
+  document.getElementById('avatarPickerModal').style.display = 'none';
+});
+document.getElementById('avatarUploadBtn').addEventListener('click', function(){
+  document.getElementById('avatarFileInput').click();
+});
+document.getElementById('avatarFileInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  if(file.size > 2*1024*1024){ toast('Image too large — please choose one under 2MB.'); return; }
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    const img = new Image();
+    img.onload = async function(){
+      const canvas = document.createElement('canvas');
+      const size = 160;
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const scale = Math.max(size/img.width, size/img.height);
+      const w = img.width*scale, h = img.height*scale;
+      ctx.drawImage(img, (size-w)/2, (size-h)/2, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+      try{
+        const result = await supabaseClient.auth.updateUser({ data: { avatar_data: dataUrl } });
+        if(result.error){ toast('Could not save photo: '+result.error.message); return; }
+        currentUser = result.data.user;
+        updateAvatarDisplay();
+        document.getElementById('avatarPickerModal').style.display = 'none';
+        toast('Photo updated');
+      }catch(err){ toast('Could not save photo. Check your connection.'); }
+    };
+    img.src = evt.target.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
+
+/* ===== Settings page ===== */
+function loadSettingsPage(){
+  const meta = currentUser.user_metadata || {};
+  document.getElementById('settingsFullName').value = meta.full_name || '';
+  document.getElementById('settingsEmail').value = currentUser.email;
+  document.getElementById('notifEmailToggle').checked = meta.notif_email !== false;
+  document.getElementById('notifPushToggle').checked = !!meta.notif_push;
+  document.getElementById('darkModeToggle').checked = !!meta.dark_mode_pref;
+  updateAvatarDisplay();
+}
+document.getElementById('settingsSaveProfileBtn').addEventListener('click', async function(){
+  const fullName = document.getElementById('settingsFullName').value.trim();
+  const btn = document.getElementById('settingsSaveProfileBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try{
+    const result = await supabaseClient.auth.updateUser({ data: { full_name: fullName } });
+    if(result.error){ toast('Could not save: '+result.error.message); return; }
+    currentUser = result.data.user;
+    updateAvatarDisplay();
+    toast('Profile saved');
+  }catch(err){
+    toast('Could not save. Check your connection.');
+  }finally{
+    btn.disabled = false; btn.textContent = 'Save Changes';
+  }
+});
+function wireSettingsToggle(elId, metaKey){
+  document.getElementById(elId).addEventListener('change', async function(e){
+    try{
+      const data = {}; data[metaKey] = e.target.checked;
+      const result = await supabaseClient.auth.updateUser({ data: data });
+      if(result.error){ toast('Could not save preference.'); return; }
+      currentUser = result.data.user;
+    }catch(err){ toast('Could not save preference. Check your connection.'); }
+  });
+}
+wireSettingsToggle('notifEmailToggle', 'notif_email');
+wireSettingsToggle('notifPushToggle', 'notif_push');
+wireSettingsToggle('darkModeToggle', 'dark_mode_pref');
+
 function applyRolePermissions(){
   const isSurveyor = currentUserRole === 'surveyor';
   document.querySelector('#subtabs button[data-tab="users"]').style.display = isSurveyor ? 'none' : '';
@@ -1226,9 +1456,8 @@ function applyRolePermissions(){
   document.getElementById('changeStatusBtn').style.display = isSurveyor ? 'none' : '';
   document.getElementById('editSelectedBtn').style.display = isSurveyor ? 'none' : '';
   document.getElementById('deleteSelectedBtn').style.display = isSurveyor ? 'none' : '';
-  document.getElementById('accountSettingsBtn').style.display = isSurveyor ? 'none' : '';
-  const roleTag = document.getElementById('accountMenuRole');
-  if(roleTag) roleTag.textContent = isSurveyor ? 'Surveyor' : 'Admin';
+  const acctLink = document.getElementById('settingsGoToAccountBtn');
+  if(acctLink) acctLink.style.display = isSurveyor ? 'none' : '';
 }
 document.getElementById('loginBtn').addEventListener('click', async function(){
   const email = document.getElementById('loginEmail').value.trim();
@@ -1295,11 +1524,9 @@ async function performLogout(){
   showLogin();
 }
 function showLogoutConfirm(){
-  document.getElementById('accountMenu').style.display = 'none';
   document.getElementById('logoutConfirmModal').style.display = 'flex';
   refreshLucideIcons();
 }
-document.getElementById('logoutBtn').addEventListener('click', function(){ showLogoutConfirm(); });
 document.getElementById('logoutCancelBtn').addEventListener('click', function(){
   document.getElementById('logoutConfirmModal').style.display = 'none';
 });
@@ -1308,59 +1535,37 @@ document.getElementById('logoutConfirmBtn').addEventListener('click', function()
   performLogout();
 });
 
-/* ===== Account menu dropdown ===== */
-document.getElementById('avatarBtn').addEventListener('click', function(e){
-  e.stopPropagation();
-  const menu = document.getElementById('accountMenu');
-  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-});
-document.addEventListener('click', function(e){
-  const menu = document.getElementById('accountMenu');
-  if(menu.style.display === 'block' && !menu.contains(e.target) && e.target.id !== 'avatarBtn'){ menu.style.display = 'none'; }
+/* ===== Avatar — jumps straight to Settings ===== */
+document.getElementById('avatarBtn').addEventListener('click', function(){
+  switchMainView('settings');
 });
 
 /* ===== Data & Privacy Policy modal ===== */
-document.getElementById('privacyPolicyBtn').addEventListener('click', function(){
-  document.getElementById('accountMenu').style.display = 'none';
+document.getElementById('settingsPrivacyBtn').addEventListener('click', function(){
   document.getElementById('privacyModal').style.display = 'flex';
 });
 document.getElementById('privacyModalClose').addEventListener('click', function(){ document.getElementById('privacyModal').style.display = 'none'; });
 document.getElementById('privacyModal').addEventListener('click', function(e){ if(e.target.id === 'privacyModal') document.getElementById('privacyModal').style.display = 'none'; });
 
 /* ===== Account Settings ===== */
-document.getElementById('accountSettingsBtn').addEventListener('click', function(){
-  document.getElementById('accountMenu').style.display = 'none';
-  document.getElementById('subtabs').style.display = 'none';
-  document.getElementById('layout').style.display = 'none';
-  document.getElementById('accountSettingsView').style.display = 'block';
-  document.getElementById('topbarSurveyName').textContent = '';
+document.getElementById('settingsGoToAccountBtn').addEventListener('click', function(){
+  switchMainView('accountsettings');
   loadProfile();
 });
 document.getElementById('accountSettingsBack').addEventListener('click', function(){
-  document.getElementById('accountSettingsView').style.display = 'none';
-  document.getElementById('subtabs').style.display = 'flex';
-  document.getElementById('layout').style.display = 'flex';
-  updateTopbarSurveyName();
+  switchMainView('settings');
 });
 
 /* ===== Help ===== */
 function openHelp(){
-  document.getElementById('accountMenu').style.display = 'none';
-  document.getElementById('subtabs').style.display = 'none';
-  document.getElementById('layout').style.display = 'none';
-  document.getElementById('helpView').style.display = 'block';
-  document.getElementById('topbarSurveyName').textContent = '';
+  switchMainView('helpdetail');
 }
-document.getElementById('helpBtn').addEventListener('click', openHelp);
 document.getElementById('helpBack').addEventListener('click', function(){
-  document.getElementById('helpView').style.display = 'none';
-  document.getElementById('subtabs').style.display = 'flex';
-  document.getElementById('layout').style.display = 'flex';
-  updateTopbarSurveyName();
+  switchMainView('dashboard');
 });
-document.querySelectorAll('#accountSettingsView [data-acctab]').forEach(function(el){
+document.querySelectorAll('#mainview-accountsettings [data-acctab]').forEach(function(el){
   el.addEventListener('click', function(){
-    document.querySelectorAll('#accountSettingsView [data-acctab]').forEach(function(b){b.classList.remove('active');});
+    document.querySelectorAll('#mainview-accountsettings [data-acctab]').forEach(function(b){b.classList.remove('active');});
     el.classList.add('active');
     document.getElementById('acc-profile').style.display = el.dataset.acctab === 'profile' ? 'block' : 'none';
     document.getElementById('acc-security').style.display = el.dataset.acctab === 'security' ? 'block' : 'none';
@@ -1402,8 +1607,7 @@ document.getElementById('profileSaveBtn').addEventListener('click', async functi
     }});
     if(result.error){ toast('Could not save: '+result.error.message); return; }
     currentUser = result.data.user;
-    document.getElementById('accountMenuName').textContent = fullName;
-    document.getElementById('avatarBtn').textContent = getInitials(fullName, currentUser.email);
+    updateAvatarDisplay();
     document.getElementById('profileAvatar').textContent = getInitials(fullName, currentUser.email);
     document.getElementById('profileUsername').textContent = fullName;
     toast('Profile saved');
@@ -1548,18 +1752,18 @@ function applyCentralLanguage(lang){
   document.querySelector('#subtabs button[data-tab="data"]').textContent = t.data;
   document.querySelector('#subtabs button[data-tab="settings"]').textContent = t.settings;
   document.querySelector('#sidebar .sidebar-label').textContent = t.surveys;
-  const logoutTextNode = document.getElementById('logoutBtn');
+  const logoutTextNode = document.getElementById('primaryLogoutBtn');
   logoutTextNode.innerHTML = '<i data-lucide="log-out" class="lucide-icon"></i> ' + t.logout;
   refreshLucideIcons();
 }
-document.getElementById('languageSelect').addEventListener('change', function(e){
+document.getElementById('settingsLanguageSelect').addEventListener('change', function(e){
   const lang = e.target.value;
   try{ localStorage.setItem('kuka_central_lang', lang); }catch(err){}
   applyCentralLanguage(lang);
 });
 try{
   const savedLang = localStorage.getItem('kuka_central_lang');
-  if(savedLang){ document.getElementById('languageSelect').value = savedLang; applyCentralLanguage(savedLang); }
+  if(savedLang){ document.getElementById('settingsLanguageSelect').value = savedLang; applyCentralLanguage(savedLang); }
 }catch(err){}
 
 /* ===== Top-level tab navigation ===== */
@@ -1582,12 +1786,14 @@ function switchMainView(view){
   document.querySelectorAll('.primary-nav-item[data-mainview]').forEach(function(el){
     el.classList.toggle('active', el.dataset.mainview === view);
   });
-  ['dashboard','survey','calendar','analytics','team','settings'].forEach(function(v){
+  ['dashboard','survey','calendar','analytics','team','settings','accountsettings','helpdetail'].forEach(function(v){
     const el = document.getElementById('mainview-'+v);
     if(el) el.style.display = (v === view) ? 'block' : 'none';
   });
   if(view === 'dashboard' && typeof allRows !== 'undefined' && allRows.length >= 0){ renderDashboard(); }
   if(view === 'calendar' && !calLoaded){ loadCalendarEvents(); }
+  if(view === 'team'){ loadTeamCards(); }
+  if(view === 'settings'){ loadSettingsPage(); }
 }
 document.querySelectorAll('.primary-nav-item[data-mainview]').forEach(function(el){
   el.addEventListener('click', function(){ switchMainView(el.dataset.mainview); });
@@ -2686,58 +2892,110 @@ async function loadGeneralSettings(){
       document.getElementById('genDescription').value = result.data.description;
     }
   }catch(e){ /* fall back to default description already set above */ }
-  loadTeamMembers();
 }
+document.getElementById('genGoToTeamBtn').addEventListener('click', function(){ switchMainView('team'); });
 
-/* ===== Team Members ===== */
-async function loadTeamMembers(){
-  const listEl = document.getElementById('teamMembersList');
-  listEl.innerHTML = '<p class="sub">Loading…</p>';
+/* ===== Team (Phase 4 — card view) ===== */
+let teamCardsLoaded = false;
+async function loadTeamCards(){
+  const gridEl = document.getElementById('teamCardsGrid');
+  gridEl.innerHTML = '<p class="sub">Loading…</p>';
   try{
-    const result = await supabaseClient.from('team_members').select('*').order('added_at', { ascending:true });
-    if(result.error){ listEl.innerHTML = '<p class="sub">Could not load team: '+escapeHtml(result.error.message)+'</p>'; return; }
-    const rows = result.data || [];
-    const adminCount = rows.filter(function(r){ return r.role === 'admin'; }).length;
-    listEl.innerHTML = rows.map(function(r){
-      const initials = getInitials('', r.email);
-      const isSelf = r.email === currentUser.email;
-      const canRemove = !isSelf && !(r.role === 'admin' && adminCount <= 1);
-      return '<div class="team-member" style="justify-content:space-between; display:flex; align-items:center;">'+
-        '<div style="display:flex; align-items:center; gap:10px;"><div class="avatar" style="background:'+(r.role==='admin'?'var(--mangrove-mid)':'var(--orange)')+';">'+escapeHtml(initials)+'</div>'+
-        '<div>'+escapeHtml(r.email)+(isSelf?' <span class="sub" style="font-size:0.72rem;">(you)</span>':'')+'</div></div>'+
-        '<div style="display:flex; align-items:center; gap:8px;"><span class="badge '+(r.role==='admin'?'synced':'pending')+'">'+(r.role==='admin'?'Admin':'Surveyor')+'</span>'+
-        (canRemove ? '<button class="btn-ghost" data-remove-team="'+r.email+'" style="padding:4px 9px;">✕</button>' : '')+'</div></div>';
+    const [teamResult, activityResult] = await Promise.all([
+      supabaseClient.from('team_members').select('*').order('added_at', { ascending:true }),
+      supabaseClient.from('activity_log').select('*').eq('action', 'Logged in').order('created_at', { ascending:false })
+    ]);
+    if(teamResult.error){ gridEl.innerHTML = '<p class="sub">Could not load team: '+escapeHtml(teamResult.error.message)+'</p>'; return; }
+    const members = teamResult.data || [];
+    const logins = activityResult.data || [];
+    const adminCount = members.filter(function(m){ return m.role === 'admin'; }).length;
+    const now = new Date();
+    const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+
+    gridEl.innerHTML = members.map(function(m){
+      const displayName = m.full_name || m.email;
+      const initials = getInitials(m.full_name || '', m.email);
+      const isSelf = m.email === currentUser.email;
+      const canRemove = !isSelf && !(m.role === 'admin' && adminCount <= 1);
+
+      const matchingSubs = m.full_name ? allRows.filter(function(r){ return r.surveyor1 === m.full_name; }) : [];
+      const subCount = matchingSubs.length;
+      let lastSubDate = null;
+      matchingSubs.forEach(function(r){ if(r.submitted_at && (!lastSubDate || r.submitted_at > lastSubDate)) lastSubDate = r.submitted_at; });
+      const lastLogin = logins.find(function(l){ return l.actor_email === m.email; });
+      const lastLoginDate = lastLogin ? lastLogin.created_at : null;
+      let lastActivity = null;
+      if(lastSubDate) lastActivity = new Date(lastSubDate);
+      if(lastLoginDate){ const d = new Date(lastLoginDate); if(!lastActivity || d > lastActivity) lastActivity = d; }
+      const isActive = lastActivity && (now - lastActivity) <= thirtyDaysMs;
+
+      return '<div class="team-card">'+
+        '<button class="team-card-menu-btn" data-menu-toggle="'+m.email+'">⋯</button>'+
+        '<div class="team-card-menu" id="teammenu-'+btoa(m.email).replace(/=/g,'')+'">'+
+          (canRemove ? '<button class="dropdown-item" data-remove-team-card="'+m.email+'" style="color:var(--alert);">Remove</button>' : '<div style="padding:8px 16px; font-size:0.8rem; color:var(--tide);">No actions available</div>')+
+        '</div>'+
+        '<div class="avatar-lg">'+escapeHtml(initials)+'</div>'+
+        '<div class="name">'+escapeHtml(displayName)+(isSelf?' <span style="font-weight:400; color:var(--tide); font-size:0.76rem;">(you)</span>':'')+'</div>'+
+        '<div class="email">'+escapeHtml(m.email)+'</div>'+
+        '<span class="badge '+(m.role==='admin'?'synced':'pending')+'">'+(m.role==='admin'?'Admin':'Surveyor')+'</span>'+
+        ' <span class="badge '+(isActive?'synced':'pending')+'">'+(isActive?'Active':'Away')+'</span>'+
+        '<div class="status-row"><span>Submissions</span><span style="font-weight:700; color:var(--ink);">'+subCount+'</span></div>'+
+        '<a href="mailto:'+escapeHtml(m.email)+'" class="btn btn-secondary" style="display:block; text-align:center; margin-top:10px; text-decoration:none;">Email</a>'+
+        '</div>';
     }).join('');
-    listEl.querySelectorAll('[data-remove-team]').forEach(function(btn){
+
+    gridEl.querySelectorAll('[data-menu-toggle]').forEach(function(btn){
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        const menu = document.getElementById('teammenu-'+btoa(btn.dataset.menuToggle).replace(/=/g,''));
+        const isOpen = menu.style.display === 'block';
+        document.querySelectorAll('.team-card-menu').forEach(function(m){ m.style.display = 'none'; });
+        menu.style.display = isOpen ? 'none' : 'block';
+      });
+    });
+    gridEl.querySelectorAll('[data-remove-team-card]').forEach(function(btn){
       btn.addEventListener('click', async function(){
-        const email = btn.dataset.removeTeam;
+        const email = btn.dataset.removeTeamCard;
         if(!confirm('Remove '+email+' from KUKA Central? They will immediately lose access.')) return;
         try{
           const delResult = await supabaseClient.from('team_members').delete().eq('email', email);
           if(delResult.error){ toast('Could not remove: '+delResult.error.message); return; }
           toast('Removed '+email);
           logActivity('Removed team member', email);
-          loadTeamMembers();
+          loadTeamCards();
         }catch(err){ toast('Could not remove. Check your connection.'); }
       });
     });
   }catch(err){
-    listEl.innerHTML = '<p class="sub">Could not load team. Check your connection.</p>';
+    gridEl.innerHTML = '<p class="sub">Could not load team. Check your connection.</p>';
   }
 }
-document.getElementById('teamAddBtn').addEventListener('click', async function(){
-  const email = document.getElementById('teamNewEmail').value.trim().toLowerCase();
-  const role = document.getElementById('teamNewRole').value;
+document.addEventListener('click', function(){
+  document.querySelectorAll('.team-card-menu').forEach(function(m){ m.style.display = 'none'; });
+});
+document.getElementById('teamCardAddBtn').addEventListener('click', function(){
+  document.getElementById('teamModalName').value = '';
+  document.getElementById('teamModalEmail').value = '';
+  document.getElementById('teamModalRole').value = 'admin';
+  document.getElementById('teamAddModal').style.display = 'flex';
+});
+document.getElementById('teamModalCancelBtn').addEventListener('click', function(){
+  document.getElementById('teamAddModal').style.display = 'none';
+});
+document.getElementById('teamModalSaveBtn').addEventListener('click', async function(){
+  const fullName = document.getElementById('teamModalName').value.trim();
+  const email = document.getElementById('teamModalEmail').value.trim().toLowerCase();
+  const role = document.getElementById('teamModalRole').value;
   if(!email || email.indexOf('@') === -1){ toast('Enter a valid email address.'); return; }
-  const btn = document.getElementById('teamAddBtn');
+  const btn = document.getElementById('teamModalSaveBtn');
   btn.disabled = true; btn.textContent = 'Adding…';
   try{
-    const result = await supabaseClient.from('team_members').insert({ email: email, role: role, added_by: currentUser.email });
+    const result = await supabaseClient.from('team_members').insert({ email: email, role: role, full_name: fullName || null, added_by: currentUser.email });
     if(result.error){ toast('Could not add: '+result.error.message); return; }
-    document.getElementById('teamNewEmail').value = '';
+    document.getElementById('teamAddModal').style.display = 'none';
     toast(email+' added as '+role);
     logActivity('Added team member', email+' — '+role);
-    loadTeamMembers();
+    loadTeamCards();
   }catch(err){
     toast('Could not add. Check your connection.');
   }finally{
