@@ -28,6 +28,25 @@
     --orange-dim:#a3521f;
     --orange-bg:#F5DFC8;
   }
+  [data-theme="dark"]{
+    --mangrove-dark:#1DA34C;
+    --mangrove-mid:#16803B;
+    --sand:#0F1420;
+    --sand-dim:#1E2536;
+    --shell:#1DA34C;
+    --shell-dim:#17843D;
+    --tide:#8891A5;
+    --alert:#E05252;
+    --ink:#E8EAF0;
+    --paper:#171D2C;
+    --line:#2A3142;
+    --aqua:#2ED9A7;
+    --aqua-dim:#6EE7C4;
+    --aqua-bg:rgba(46,217,167,0.15);
+    --orange:#E08650;
+    --orange-dim:#F0A876;
+    --orange-bg:rgba(224,134,80,0.15);
+  }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
@@ -348,11 +367,11 @@
       <div class="primary-nav-item active" data-mainview="dashboard"><i data-lucide="layout-grid" class="lucide-icon"></i> Dashboard</div>
       <div class="primary-nav-item" data-mainview="survey"><i data-lucide="clipboard-list" class="lucide-icon"></i> Survey</div>
       <div class="primary-nav-item" data-mainview="calendar"><i data-lucide="calendar" class="lucide-icon"></i> Calendar</div>
-      <div class="primary-nav-item" data-mainview="analytics"><i data-lucide="bar-chart-3" class="lucide-icon"></i> Analytics</div>
+      <div class="primary-nav-item" data-mainview="analytics"><i data-lucide="chart-column" class="lucide-icon"></i> Analytics</div>
       <div class="primary-nav-item" data-mainview="team"><i data-lucide="users" class="lucide-icon"></i> Team</div>
       <div class="sidebar-label">General</div>
       <div class="primary-nav-item" data-mainview="settings"><i data-lucide="settings" class="lucide-icon"></i> Settings</div>
-      <div class="primary-nav-item" id="primaryHelpBtn"><i data-lucide="help-circle" class="lucide-icon"></i> Help</div>
+      <div class="primary-nav-item" id="primaryHelpBtn"><i data-lucide="circle-question-mark" class="lucide-icon"></i> Help</div>
       <div class="primary-nav-item" id="primaryLogoutBtn" style="color:var(--alert);"><i data-lucide="log-out" class="lucide-icon"></i> Logout</div>
     </aside>
 
@@ -581,7 +600,7 @@
 
     <div class="card" style="max-width:600px;">
       <h3>Appearance</h3>
-      <div class="settings-toggle-row"><div><div class="t">Dark Mode</div><div class="s">A dark theme isn't built yet — this just saves your preference for when it is.</div></div><label class="switch"><input type="checkbox" id="darkModeToggle"><span class="switch-slider"></span></label></div>
+      <div class="settings-toggle-row"><div><div class="t">Dark Mode</div><div class="s">Switch to a dark color theme across KUKA Central.</div></div><label class="switch"><input type="checkbox" id="darkModeToggle"><span class="switch-slider"></span></label></div>
     </div>
 
     <div class="card" style="max-width:600px;">
@@ -939,7 +958,7 @@
           <div style="display:flex; gap:20px; align-items:flex-start; min-width:0;">
             <div id="dataSubnav" class="mini-nav-card" style="width:130px; flex:none;">
               <button class="settings-subnav-item active" id="dataViewTableBtn"><i data-lucide="table" class="lucide-icon"></i> Table</button>
-              <button class="settings-subnav-item" id="dataViewReportsBtn"><i data-lucide="bar-chart-3" class="lucide-icon"></i> Reports</button>
+              <button class="settings-subnav-item" id="dataViewReportsBtn"><i data-lucide="chart-column" class="lucide-icon"></i> Reports</button>
               <button class="settings-subnav-item" id="dataViewGalleryBtn"><i data-lucide="image" class="lucide-icon"></i> Gallery</button>
               <button class="settings-subnav-item" id="dataViewMapBtn"><i data-lucide="map" class="lucide-icon"></i> Map</button>
             </div>
@@ -963,9 +982,9 @@
                   <div style="position:relative;">
                     <button class="btn-ghost" id="changeStatusBtn" disabled><i data-lucide="tag" class="lucide-icon"></i> Change Status</button>
                     <div id="changeStatusPanel" style="display:none; position:absolute; top:38px; right:0; background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:6px; box-shadow:0 6px 18px rgba(27,46,40,0.15); z-index:50; min-width:150px;">
-                      <button class="quicklink" data-review="approved" style="border:none;"><i data-lucide="check-circle" class="lucide-icon"></i> Approved</button>
-                      <button class="quicklink" data-review="not_approved" style="border:none;"><i data-lucide="x-circle" class="lucide-icon"></i> Not Approved</button>
-                      <button class="quicklink" data-review="on_hold" style="border:none;"><i data-lucide="pause-circle" class="lucide-icon"></i> On-Hold</button>
+                      <button class="quicklink" data-review="approved" style="border:none;"><i data-lucide="circle-check-big" class="lucide-icon"></i> Approved</button>
+                      <button class="quicklink" data-review="not_approved" style="border:none;"><i data-lucide="circle-x" class="lucide-icon"></i> Not Approved</button>
+                      <button class="quicklink" data-review="on_hold" style="border:none;"><i data-lucide="circle-pause" class="lucide-icon"></i> On-Hold</button>
                       <button class="quicklink" data-review="not_reviewed" style="border:none;"><i data-lucide="rotate-ccw" class="lucide-icon"></i> Not Reviewed</button>
                     </div>
                   </div>
@@ -1226,6 +1245,11 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <script>
+try{
+  if(localStorage.getItem('kuka_central_dark') === 'true'){
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+}catch(err){}
 const SUPABASE_URL = "https://spwdpzcuyrwjdhvluadu.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNwd2RwemN1eXJ3amRodmx1YWR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5OTQyOTYsImV4cCI6MjA5NjU3MDI5Nn0.xoI33qTtwT0SMxY_uJGQ0xSWE1o3Q0UgifguMyjvso8";
 let currentUserRole = null;
@@ -1280,6 +1304,8 @@ function getInitials(name, email){
 function showApp(){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appShell').classList.add('show');
+  const savedDarkPref = currentUser.user_metadata && currentUser.user_metadata.dark_mode_pref;
+  applyDarkMode(!!savedDarkPref);
   updateAvatarDisplay();
   updateTopbarSurveyName();
   applyRolePermissions();
@@ -1292,7 +1318,7 @@ const AVATAR_PRESETS = [
   { bg:'#3B82F6', icon:'anchor' },
   { bg:'#C4622D', icon:'compass' },
   { bg:'#8B5CF6', icon:'shell' },
-  { bg:'#0C9268', icon:'waves' },
+  { bg:'#0C9268', icon:'waves-horizontal' },
   { bg:'#DC2626', icon:'map-pin' }
 ];
 function updateAvatarDisplay(){
@@ -1447,7 +1473,18 @@ function wireSettingsToggle(elId, metaKey){
 }
 wireSettingsToggle('notifEmailToggle', 'notif_email');
 wireSettingsToggle('notifPushToggle', 'notif_push');
-wireSettingsToggle('darkModeToggle', 'dark_mode_pref');
+function applyDarkMode(isDark){
+  if(isDark){ document.documentElement.setAttribute('data-theme', 'dark'); }
+  else { document.documentElement.removeAttribute('data-theme'); }
+  try{ localStorage.setItem('kuka_central_dark', isDark ? 'true' : 'false'); }catch(err){}
+}
+document.getElementById('darkModeToggle').addEventListener('change', async function(e){
+  applyDarkMode(e.target.checked);
+  try{
+    const result = await supabaseClient.auth.updateUser({ data: { dark_mode_pref: e.target.checked } });
+    if(!result.error){ currentUser = result.data.user; }
+  }catch(err){}
+});
 
 function applyRolePermissions(){
   const isSurveyor = currentUserRole === 'surveyor';
