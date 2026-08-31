@@ -630,7 +630,7 @@
 
     <div class="card" style="max-width:600px;">
       <h3>Notifications</h3>
-      <p class="sub" style="margin-bottom:14px;">These are saved preferences — KUKA Central doesn't send automated notifications yet, so toggling these won't trigger anything until that's built.</p>
+      <p class="sub" style="margin-bottom:14px;">These control email and browser push notifications specifically — separate from the in-app notification bell (top right), which is already fully working. Email/push delivery isn't built yet, so these two toggles just save your preference for later.</p>
       <div class="settings-toggle-row"><div><div class="t">Email notifications</div><div class="s">Receive email about your account activity</div></div><label class="switch"><input type="checkbox" id="notifEmailToggle"><span class="switch-slider"></span></label></div>
       <div class="settings-toggle-row"><div><div class="t">Push notifications</div><div class="s">Receive push notifications in your browser</div></div><label class="switch"><input type="checkbox" id="notifPushToggle"><span class="switch-slider"></span></label></div>
     </div>
@@ -840,7 +840,12 @@
 
     <div class="card" data-help-topic>
       <h3>Team</h3>
-      <p class="sub">Add team members by email, name, and role (Admin or Surveyor). Each card shows real Active/Away status based on recent activity, a genuine submission count matched to their name, and a working Email button.</p>
+      <p class="sub">Add team members by email, name, and role (Admin or Surveyor). Each card shows real Active/Away status based on recent activity, and a genuine submission count matched to their name.</p>
+    </div>
+
+    <div class="card" data-help-topic>
+      <h3>Notifications</h3>
+      <p class="sub">The bell icon (top right) shows a real notification feed — new submissions, team changes, event creation, exports, and status changes. An orange dot means something's unread. Click the bell to view them, and use "Mark all as read" to clear it.</p>
     </div>
 
     <div class="card" data-help-topic>
