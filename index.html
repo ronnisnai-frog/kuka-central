@@ -699,8 +699,9 @@
         </div>
 
         <div class="card">
-          <label class="first" style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Full Name *</label>
-          <input type="text" id="profFullName" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand); margin-bottom:16px;">
+          <label class="first" style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--mangrove-mid); margin-bottom:6px;">Full Name</label>
+          <input type="text" id="profFullName" disabled style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:7px; font-family:inherit; font-size:0.9rem; background:var(--sand-dim); color:var(--tide); margin-bottom:4px;">
+          <p style="font-size:0.72rem; color:var(--tide); margin:0 0 16px;">Edit your name from the Settings page.</p>
 
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
             <div>
@@ -993,19 +994,6 @@
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <div class="two-col-tasko">
-            <div class="panel-tasko" style="flex:1.4;">
-              <div class="panel-head-tasko"><h3>Surveyor Activity</h3></div>
-              <div id="surveyorActivityList"></div>
-            </div>
-            <div class="promo-card-tasko">
-              <h3>Get KUKA Collect</h3>
-              <p>Onboard a new surveyor onto the mobile field app.</p>
-              <a class="promo-btn-tasko" href="https://ronnisnai-frog.github.io/kuka-survey/" target="_blank"><i data-lucide="smartphone" class="lucide-icon"></i> Open KUKA Collect</a>
-              <button class="promo-btn-tasko" id="copyInviteLinkBtn"><i data-lucide="clipboard" class="lucide-icon"></i> Copy Invite Link</button>
             </div>
           </div>
         </section>
@@ -1315,7 +1303,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://unpkg.com/lucide@1.34.0/dist/umd/lucide.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 try{
@@ -1905,9 +1893,11 @@ function goToTab(tab){
 
 /* ===== Primary sidebar navigation ===== */
 function switchMainView(view){
+  const highlightView = (view === 'helpdetail') ? 'help' : (view === 'accountsettings' ? 'settings' : view);
   document.querySelectorAll('.primary-nav-item[data-mainview]').forEach(function(el){
-    el.classList.toggle('active', el.dataset.mainview === view);
+    el.classList.toggle('active', el.dataset.mainview === highlightView);
   });
+  document.getElementById('primaryHelpBtn').classList.toggle('active', highlightView === 'help');
   ['dashboard','survey','calendar','analytics','team','settings','accountsettings','helpdetail'].forEach(function(v){
     const el = document.getElementById('mainview-'+v);
     if(el) el.style.display = (v === view) ? 'block' : 'none';
@@ -2625,32 +2615,6 @@ function renderSummaryStats(){
     document.getElementById('reminderBtn').style.display = 'none';
   }
 
-  // Surveyor activity list
-  const bySurveyor = {};
-  rows.forEach(function(r){
-    const name = r.surveyor1 || 'Unknown';
-    if(!bySurveyor[name]) bySurveyor[name] = { synced:0, pending:0, lastSite:'', lastDate:'' };
-    if(r.synced !== false){ bySurveyor[name].synced++; } else { bySurveyor[name].pending++; }
-    if(!bySurveyor[name].lastDate || (r.survey_date && r.survey_date > bySurveyor[name].lastDate)){
-      bySurveyor[name].lastDate = r.survey_date || '';
-      bySurveyor[name].lastSite = getLabel(r);
-    }
-  });
-  const names = Object.keys(bySurveyor).sort(function(a,b){ return (bySurveyor[b].synced+bySurveyor[b].pending) - (bySurveyor[a].synced+bySurveyor[a].pending); });
-  const listEl = document.getElementById('surveyorActivityList');
-  if(names.length === 0){
-    listEl.innerHTML = '<p class="sub">No submissions yet for this survey type.</p>';
-  } else {
-    listEl.innerHTML = names.slice(0,6).map(function(name){
-      const s = bySurveyor[name];
-      const initials = getInitials(name, '');
-      const tagClass = s.pending > 0 ? 'pending' : 'approved';
-      const tagText = s.pending > 0 ? (s.pending+' pending') : (s.synced+' synced');
-      return '<div class="surveyor-row"><div class="avatar">'+escapeHtml(initials)+'</div>'+
-        '<div class="info"><div class="name">'+escapeHtml(name)+'</div><div class="sub">Last: '+escapeHtml(s.lastSite||'—')+(s.lastDate?', '+escapeHtml(s.lastDate):'')+'</div></div>'+
-        '<span class="badge '+tagClass+'">'+escapeHtml(tagText)+'</span></div>';
-    }).join('');
-  }
   refreshLucideIcons();
 }
 document.querySelectorAll('[data-goto-tab]').forEach(function(el){
@@ -2660,11 +2624,6 @@ document.querySelectorAll('[data-goto-tab]').forEach(function(el){
   });
 });
 document.getElementById('reminderBtn').addEventListener('click', function(){ goToTab('data'); });
-document.getElementById('copyInviteLinkBtn').addEventListener('click', function(){
-  const url = 'https://ronnisnai-frog.github.io/kuka-survey/';
-  if(navigator.clipboard){ navigator.clipboard.writeText(url); toast('Link copied to clipboard'); }
-  else{ toast(url); }
-});
 
 /* ===== Users tab ===== */
 async function loadUsers(){
