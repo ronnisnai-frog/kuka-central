@@ -2739,7 +2739,7 @@ const COLUMNS_BY_TYPE = {
   ],
   biological: [
     { label:'Review', html:true, get:reviewBadgeHtml },
-    { label:'Start Time', get:function(r){ return r.start_time || '—'; } },
+    { label:'Start Time', get:function(r){ return (r.data && r.data.startTime) || '—'; } },
     { label:'Date', get:function(r){ return r.survey_date || '—'; } },
     { label:'Surveyor 1', get:function(r){ return r.surveyor1 || '—'; } },
     { label:'Surveyor 2', get:function(r){ return (r.data && r.data.surveyor2) || '—'; } },
