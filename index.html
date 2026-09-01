@@ -116,17 +116,19 @@
   #layout{ display:flex; align-items:flex-start; }
 
   #primarySidebar{ width:220px; flex:none; background:var(--paper); border-right:1px solid var(--line); min-height:100vh; padding:0 0 18px; }
-  .primary-nav-item{ display:flex; align-items:center; gap:10px; padding:10px 16px; margin:2px 12px; border-radius:8px; font-size:0.88rem; font-weight:600; color:var(--tide); cursor:pointer; }
-  .primary-nav-item:hover{ background:var(--sand-dim); }
-  .primary-nav-item.active{ background:var(--shell); color:#fff; }
+  .primary-nav-item{ display:flex; align-items:center; gap:10px; padding:10px 16px; margin:2px 12px; border-radius:8px; font-size:0.88rem; font-weight:600; color:var(--tide); cursor:pointer;
+    transition:background-color 200ms ease-in-out, color 200ms ease-in-out, transform 150ms ease-out; }
+  .primary-nav-item:hover{ background:var(--sand-dim); transform:translateX(3px); }
+  .primary-nav-item.active{ background:var(--shell); color:#fff; transform:translateX(0); }
   .primary-nav-item .lucide-icon{ width:16px; height:16px; flex:none; }
   .mainview-page{ padding:26px 30px; }
   #mainview-survey{ padding:0; }
   #sidebar{ width:220px; flex:none; background:var(--paper); border-right:1px solid var(--line); min-height:calc(100vh - 96px); padding:18px 0; }
   .sidebar-label{ padding:10px 20px 8px; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--tide); font-weight:700; }
-  .survey-item{ padding:11px 16px; margin:2px 12px; border-radius:9px; font-size:0.92rem; cursor:pointer; font-weight:600; letter-spacing:0.1px; line-height:1.3; color:var(--tide); }
-  .survey-item:hover{ background:var(--sand-dim); }
-  .survey-item.active{ background:var(--shell); color:#fff; }
+  .survey-item{ padding:11px 16px; margin:2px 12px; border-radius:9px; font-size:0.92rem; cursor:pointer; font-weight:600; letter-spacing:0.1px; line-height:1.3; color:var(--tide);
+    transition:background-color 200ms ease-in-out, color 200ms ease-in-out, transform 150ms ease-out; }
+  .survey-item:hover{ background:var(--sand-dim); transform:translateX(3px); }
+  .survey-item.active{ background:var(--shell); color:#fff; transform:translateX(0); }
 
   #main{ flex:1; padding:26px 30px; display:flex; gap:22px; min-width:0; }
   #centerCol{ flex:1; min-width:0; }
